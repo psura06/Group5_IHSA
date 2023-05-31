@@ -1,0 +1,164 @@
+/* styles.css */
+
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+  padding-top: 70px; /* Added padding top to body */
+}
+
+.main-content {
+  margin-top: 70px;
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+.map-page {
+  display: flex;
+  height: calc(100vh - 70px); /* 70px is the approximate height of your navbar including padding, adjust accordingly */
+} 
+
+
+
+
+.map-container {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.map-container.shrink {
+  flex: 0 0 55%;
+}
+
+.school-table {
+  flex: 0 0 45%;
+  background-color: #fff;
+  padding: 1rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  overflow: auto;
+  max-height: 100%;
+}
+
+.table-container {
+  width: 100%;
+}
+
+.table-container .school-table {
+  position: sticky;
+  top: 0;
+}
+
+.selected-school {
+  background-color: #e0e0e0;
+}
+
+.map-legend {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 0.5rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  width: 150px; 
+}
+
+
+.zone-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.zone-color {
+  width: 12px;
+  height: 12px;
+  margin-right: 0.5rem;
+}
+
+.zone-label {
+  font-size: 12px;
+}
+
+.arrow-button {
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  background-color: rgba(255, 255, 255, 0.8);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.arrow-button:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+.arrow-icon {
+  width: 20px;
+  height: 20px;
+  transform: rotate(180deg);
+}
+
+/* Table Styles */
+.school-table table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  font-size: 14px;
+}
+
+.school-table th,
+.school-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+.school-table th {
+  font-weight: bold;
+  background-color: #f5f5f5;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.school-table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.school-table tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+.school-table .selected-school {
+  background-color: #e0e0e0;
+}
+
+.school-table td:last-child {
+  white-space: nowrap;
+}
+
+.school-table td:first-child,
+.school-table th:first-child {
+  padding-left: 1.5rem;
+}
+
+.school-table td:last-child,
+.school-table th:last-child {
+  padding-right: 1.5rem;
+}
