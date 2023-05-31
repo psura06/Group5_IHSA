@@ -1,0 +1,71 @@
+.navbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  background-color: navy;
+  color: white;
+  padding: 1rem;
+  height: 70px;
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 999;
+  width: 100%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.logo {
+  width: 110px;
+  height: 60px;
+}
+
+.menu {
+  display: flex;
+  gap: 0.5rem;
+  list-style: none;
+  justify-content: flex-end;
+  margin-right: 1rem;
+}
+
+.menu li {
+  margin-left: 0.5rem;
+}
+
+.navbar a {
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+  position: relative;
+}
+
+.navbar a:hover::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  background-color: white;
+  border-radius: 8px;
+  opacity: 0.5;
+  z-index: -1;
+}
+
+.navbar a:hover span {
+  color: navy;
+}
+
+.navbar a span {
+  position: relative;
+  z-index: 1;
+}
+
+.menu li:not(:last-child) {
+  margin-right: 1rem; /* Add gap between components */
+}
+
+.logo-link {
+  margin-right: auto; /* Move the logo to the left */
+  margin-left: 1rem; /* Add left margin for spacing */
+}

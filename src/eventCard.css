@@ -1,0 +1,38 @@
+.event-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 15px;
+  border-radius: 15px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.event-card img {
+  width: 100%;
+  height: 40%;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.event-card-info {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.event-card-info h3 {
+  font-weight: bold;
+  font-size: 1.2em;
+  margin-bottom: 5px;
+}
+
+.event-card-info .venue {
+  color: navy;
+  margin-bottom: 5px;
+}
+
+.event-card-info .date-time {
+  color: red;
+}
