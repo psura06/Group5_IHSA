@@ -150,12 +150,7 @@ const HomePage = ({ userRole, handleLogout }) => {
               <EventCard key={event.id} event={event} style={{ width: '250px', height: '400px' }} />
             ))}
           </div>
-          <button className="scroll-button left" onClick={() => scrollEventCards('left')}>
-            <i className="fa fa-angle-left"></i>
-          </button>
-          <button className="scroll-button right" onClick={() => scrollEventCards('right')}>
-            <i className="fa fa-angle-right"></i>
-          </button>
+         
         </div>
       </div>
       <div className="events-container">
@@ -166,12 +161,7 @@ const HomePage = ({ userRole, handleLogout }) => {
               <EventCard key={event.id} event={event} style={{ width: '250px', height: '400px' }} />
             ))}
           </div>
-          <button className="scroll-button left" onClick={() => scrollEventCards('left')}>
-            <i className="fa fa-angle-left"></i>
-          </button>
-          <button className="scroll-button right" onClick={() => scrollEventCards('right')}>
-            <i className="fa fa-angle-right"></i>
-          </button>
+         
         </div>
       </div>
       <div className="events-container">
@@ -182,12 +172,7 @@ const HomePage = ({ userRole, handleLogout }) => {
               <EventCard key={event.id} event={event} style={{ width: '250px', height: '400px' }} />
             ))}
           </div>
-          <button className="scroll-button left" onClick={() => scrollEventCards('left')}>
-            <i className="fa fa-angle-left"></i>
-          </button>
-          <button className="scroll-button right" onClick={() => scrollEventCards('right')}>
-            <i className="fa fa-angle-right"></i>
-          </button>
+          
         </div>
       </div>
     </div>
