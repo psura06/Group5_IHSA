@@ -1,11 +1,11 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import NavBar from './NavBar';
-import { announcements } from './AnnouncementsPage';
 import Slider from 'react-slick';
+import axios from 'axios';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import '../homePage.css';
+import '../stylings/homePage.css';
 import EventCard from './EventCard';
 import { getEvents } from '../api';
 import moment from 'moment';
@@ -17,15 +17,24 @@ import Image3 from '../assets/carousel/c3.jpg';
 import Image4 from '../assets/carousel/c4.jpg';
 import Image5 from '../assets/carousel/c5.jpg';
 
-const HomePage = () => {
+const HomePage = ({ userRole, handleLogout }) => { 
+  console.log('HomePage rendered');
   const carouselImages = [Image1, Image2, Image3, Image4, Image5];
   const eventCardContainerRef = useRef(null);
   const [ongoingEvents, setOngoingEvents] = useState([]);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [pastEvents, setPastEvents] = useState([]);
+  const [announcements, setAnnouncements] = useState([]);
 
   useEffect(() => {
     loadEvents();
+
+    // Fetch announcements from the server
+    axios.get('http://localhost:8000/api/announcements')
+      .then(response => {
+        setAnnouncements(response.data);
+      })
+      .catch(error => console.log(error));
   }, []);
 
   const loadEvents = async () => {
@@ -96,7 +105,7 @@ const HomePage = () => {
 
   return (
     <div className="home-page">
-      <NavBar />
+      <NavBar userRole={userRole} handleLogout={handleLogout} />
       <div className="announcement-container">
         <div className="announcement-scroll">
           {announcements.map((announcement) => (
@@ -128,7 +137,7 @@ const HomePage = () => {
             abilities, promotes individual and team competition in hunter seat equitation, Western horsemanship, and
             reining at more than 400 member schools and institutions. Regardless of their level of knowledge or financial
             situation, IHSA members attend horse events. With furnished horses, students compete at levels from novice to
-            advanced, saving money on the expense of owning a horse.
+            advanced,saving money on the expense of owning a horse.
           </p>
         </div>
       </div>

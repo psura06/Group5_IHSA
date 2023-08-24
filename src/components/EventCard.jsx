@@ -2,23 +2,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const EventCard = ({ event, style }) => {
-
-  const formatTime = (timeString) => {
-    const [hours, minutes] = timeString.split(':');
-    let period = 'AM';
-    let hoursFormatted = parseInt(hours, 10);
-
-    if (hoursFormatted > 12) {
-      hoursFormatted -= 12;
-      period = 'PM';
-    }
-
-    return `${hoursFormatted}:${minutes} ${period}`;
-  };
-
-  const formatTimezone = (timezone) => {
-    // Replace with your timezone formatting logic
-    return timezone;
+  const formatDateAndTime = (dateString, timeString) => {
+    const date = dateString.split('T')[0]; // Extract the date part
+    const time = timeString.split('.')[0]; // Extract the time part
+    return `${date} ${time}`;
   };
 
   return (
@@ -31,8 +18,10 @@ const EventCard = ({ event, style }) => {
             <strong>Venue:</strong> {event.venue}
           </div>
           <div className="date-time">
-            <strong>Start:</strong> {formatTime(event.start_time)} <strong>End:</strong> {formatTime(event.end_time)}{' '}
-            {formatTimezone(event.timezone)}
+            <strong>Start:</strong> {formatDateAndTime(event.start_date, event.start_time)}
+          </div>
+          <div className="date-time">
+            <strong>End:</strong> {formatDateAndTime(event.end_date, event.end_time)}
           </div>
         </div>
       </div>

@@ -1,0 +1,226 @@
+.home-page {
+  display: flex;
+  flex-direction: column;
+  background-color: #f0f0f0;
+  padding-bottom: 20px;
+}
+
+.content-card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin: 20px 0;
+}
+
+.slick-slide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.slick-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.slick-dots {
+  bottom: -30px; /* Position the dots up a little */
+}
+
+.slick-next:before,
+.slick-prev:before {
+  color: white;
+  font-size: 20px;
+}
+
+.slick-next,
+.slick-prev {
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  padding: 5px;
+  width: 35px;
+  height: 35px;
+  line-height: 30px;
+  text-align: center;
+}
+
+.slick-next {
+  right: 15px; /* Position the next arrow */
+}
+
+.slick-prev {
+  left: 15px; /* Position the prev arrow */
+}
+
+.announcement-container {
+  width: 100%;
+  overflow: hidden;
+  background-color: #fff;
+  padding: 1px 0;
+  margin-top: 1rem;
+}
+
+.announcement-scroll {
+  white-space: nowrap;
+  animation: scroll-left 40s linear infinite;
+}
+
+.announcement-item {
+  display: inline-block;
+  padding: 0 20px;
+}
+
+@keyframes scroll-left {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.about-card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-top: 40px;
+}
+
+.about-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.about-header h2 {
+  margin: 0;
+}
+
+.header-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.about-content {
+  margin-top: 10px;
+}
+
+.events-container {
+  margin-top: 20px;
+  padding: 0 20px;
+}
+
+.events-container h2 {
+  margin-bottom: 20px;
+}
+
+.event-card-scroll {
+  position: relative;
+  overflow-x: hidden;
+}
+
+.event-card-container {
+  display: flex;
+  gap: 20px;
+  padding: 10px 0;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  overflow-x: auto;
+}
+
+.event-card {
+  flex: 0 0 calc(100% / 4); /* Adjust the width based on the number of cards to be shown */
+  background-color: #fff;
+  border-radius: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  cursor: pointer;
+  width: 250px; /* Width from HomePage.jsx */
+  height: 400px; /* Height from HomePage.jsx */
+  object-fit: cover;
+  margin: 0 auto;
+}
+
+.event-card img {
+  width: 100%;
+  height: 200px; /* Adjust the height as needed */
+  object-fit: cover;
+  border-radius: 15px 15px 0 0;
+}
+
+.event-card-info {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.event-card-info h3 {
+  font-weight: bold;
+  font-size: 1.2em;
+  margin: 0;
+}
+
+.event-card-info .venue {
+  color: navy;
+  margin-bottom: 5px;
+}
+
+.event-card-info .date-time {
+  color: red;
+  margin-bottom: 5px;
+}
+
+.scroll-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.left {
+  left: 10px;
+}
+
+.right {
+  right: 10px;
+}
+
+/* existing code... */
+
+.sponsor-card {
+  width: 100%;
+  padding: 15px;
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  border-radius: 5px;
+  overflow: hidden; /* ensures images also get the rounded corners */
+}
+
+.sponsor-card h2 {
+  text-align: start;
+  margin-bottom: 15px;
+}
+
+.sponsor-img-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100px; /* adjust this value to make the images smaller or larger */
+}
+
+.sponsor-img-wrapper img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain; /* keep aspect ratio */
+}
+
+/* existing code... */

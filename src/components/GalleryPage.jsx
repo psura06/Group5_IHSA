@@ -7,9 +7,9 @@ import event4 from '../assets/events/event4.jpg';
 import event5 from '../assets/events/event5.jpg';
 import event6 from '../assets/events/event6.jpg';
 import event7 from '../assets/events/event7.jpg';
-// Add more event images as needed
+import NavBar from './NavBar'
 
-import '../galleryPage.css';
+import '../stylings/galleryPage.css';
 
 const events = [
   { id: 1, name: 'Event 1', image: event1, link: 'https://drive.google.com' },
@@ -22,7 +22,7 @@ const events = [
   // Add more events as needed
 ];
 
-const GalleryPage = () => {
+const GalleryPage = ({ userRole, handleLogout }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -62,6 +62,7 @@ const GalleryPage = () => {
 
   return (
     <div className="gallery-page">
+      <NavBar userRole={userRole} handleLogout={handleLogout} />
       <h1 className="gallery-title">GALLERY</h1>
       <div className="search-bar">
         <input

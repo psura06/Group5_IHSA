@@ -1,0 +1,113 @@
+/* randomizePage.css */
+
+.randomizePage {
+  background-image: url('../assets/horse\ background.jpg');
+  background-size: cover;
+  background-position: center;
+  height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 50px;
+}
+
+.transparentCard {
+  background-color: rgba(128, 128, 128, 0.6);
+  border-radius: 15px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 400px;
+  margin-right: 20px;
+}
+
+.transparentCard h1 {
+  color: white;
+  margin-bottom: 20px;
+}
+
+.uploadCard {
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  width: 300px;
+  margin-bottom: 20px;
+}
+
+.uploadCard h2 {
+  color: black;
+  margin-bottom: 10px;
+}
+
+.chooseFileButton {
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+
+.randomizeButton,
+.downloadButton {
+  background-color: blue;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 5px;
+  margin-left: 20px;
+  cursor: pointer;
+}
+
+.fileUploadMessage {
+  color: green;
+  margin-bottom: 20px;
+}
+
+.resultsContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  overflow-x: hidden;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.resultsTableContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  overflow-y: auto; 
+  max-height: calc(126vh - 140px); 
+}
+
+.resultsTable {
+  width: auto;
+  color: white;
+}
+
+.resultsTable h2 {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  color: white;
+}
+
+.resultsTable table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 10px;
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+.resultsTable th,
+.resultsTable td {
+  border: 1px solid darkgrey;
+  padding: 10px;
+  text-align: left;
+  color: white;
+}
+
+.resultsTable th {
+  background-color: darkgrey;
+}
+
+.downloadButton {
+  margin-top: 10px;
+}

@@ -1,0 +1,71 @@
+/* App.css */
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: navy;
+  color: white;
+  padding: 1rem;
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 999; /* To make navbar appear on top of other content */
+  width: 100%;
+}
+
+.navbar h1 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: red;
+}
+
+.navbar ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  gap: 1rem;
+}
+
+.navbar li {
+  margin-bottom: 10px;
+}
+
+.navbar a {
+  color: white;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  text-transform: uppercase;
+}
+
+.navbar a svg {
+  margin-right: 10px;
+}
+
+.content {
+  flex-grow: 1;
+  margin-top: 70px; /* Adjust this value to match the height of the navbar */
+  padding: 20px;
+  background-color: #f4f4f4;
+  overflow-y: auto;
+}
+
+.content-container {
+  flex-grow: 1;
+}

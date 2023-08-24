@@ -1,0 +1,89 @@
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: navy;
+  color: white;
+  padding: 1rem;
+  height: 60px;
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 999;
+  width: calc(100% - 30px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+body {
+  margin-top: 60px;
+}
+
+.logo {
+  width: 110px;
+  height: 60px;
+}
+
+.menu {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  list-style: none;
+}
+
+.menu li {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.navbar a {
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.navbar a:hover::after, .navbar a:focus::after, .navbar a:active::after, 
+.login:hover::after, .login:focus::after, .login:active::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 2rem;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 5px;
+  z-index: -1;
+}
+
+.navbar a svg {
+  margin-right: 0.2rem;
+  width: 14px;
+  height: 14px;
+}
+
+.menu li:not(:last-child) {
+  margin-right: 0.6rem;
+}
+
+.login {
+  background: transparent;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  padding: 0.2rem 0.4rem;
+  margin-left: 1rem;
+  text-decoration: none;
+  position: relative;
+}
+
+.logo-link {
+  margin-right: auto;
+  margin-left: 1rem;
+}

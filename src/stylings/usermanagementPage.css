@@ -1,0 +1,62 @@
+.user-management-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  
+  .table-container {
+    height: 400px;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  
+  .table-title {
+    margin-bottom: 10px;
+  }
+  
+  .add-user-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    margin-top: 20px;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  
+  .add-user-form {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 20px;
+    width: 300px;
+  }
+  
+  .form-control {
+    width: 100%;
+  }
+  
+  .create-user-button {
+    align-self: flex-end;
+  }
+  
+  .action-button {
+    margin-left: 0;
+  }
+  .make-admin-button {
+    margin-right: 10px;
+  }
+  .action-button-left {
+    margin-right: 10px;
+  }
+  
+  .action-button-right {
+    margin-left: 10px;
+  }
+  

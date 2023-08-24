@@ -1,0 +1,39 @@
+.about-page {
+    padding: 2rem;
+  }
+  
+  .about-title {
+    margin: 0;
+  }
+  
+  .about-info {
+    margin-top: 2rem;
+  }
+  
+  .about-image {
+    margin-top: 2rem;
+    text-align: center;
+  }
+  
+  .about-image img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+  }
+  
+  .mission-title {
+    margin-top: 2rem;
+  }
+  
+  .mission-info {
+    margin-top: 1rem;
+  }
+  
+  .about-site-title {
+    margin-top: 2rem;
+  }
+  
+  .about-site-info {
+    margin-top: 1rem;
+  }
+  

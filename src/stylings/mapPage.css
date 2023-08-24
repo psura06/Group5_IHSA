@@ -1,0 +1,80 @@
+/* styles.css */
+
+/* Define styles for the navigation card */
+.nav-card {
+    position: fixed;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 60px; /* Initial width */
+    height: 100%;
+    background-color: #333;
+    color: #fff;
+    overflow: hidden;
+    transition: width 0.3s ease-in-out;
+    z-index: 1;
+  }
+  
+  /* Expand the navigation card */
+  .nav-card.expanded {
+    width: 300px; /* Expanded width */
+  }
+  
+  /* Style the card header */
+  .nav-card-header {
+    padding: 10px;
+    cursor: pointer;
+    text-align: center;
+  }
+  
+  /* Style the card content */
+  .nav-card-content {
+    padding: 20px;
+    display: none;
+  }
+  
+  /* Show the card content when expanded */
+  .nav-card.expanded .nav-card-content {
+    display: block;
+  }
+  
+  /* Style the tabs */
+  .nav-card-tab {
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+  }
+  
+  .nav-card-tab.active {
+    background-color: #555; /* Active tab background color */
+  }
+  
+  /* Add smooth hover effect to tabs */
+  .nav-card-tab:hover {
+    background-color: #555;
+  }
+  
+  /* Add arrow icon to collapse button */
+  .nav-card-header::before {
+    content: '\25C0'; /* Unicode for left-pointing arrow */
+    display: inline-block;
+    margin-right: 10px;
+    transition: transform 0.2s ease-in-out;
+  }
+  
+  /* Rotate the arrow when the card is expanded */
+  .nav-card.expanded .nav-card-header::before {
+    transform: rotate(-90deg);
+  }
+  
+  /* Define styles for the map */
+  .map-container {
+    margin-left: 60px; /* Same as the initial width of the navigation card */
+    transition: margin-left 0.3s ease-in-out;
+  }
+  
+  /* Shift the map when the card is expanded */
+  .nav-card.expanded + .map-container {
+    margin-left: 300px; /* Same as the expanded width of the navigation card */
+  }
+  

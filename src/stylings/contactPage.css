@@ -1,0 +1,80 @@
+.contact-container {
+    text-align: center;
+    padding: 50px 0;
+  }
+  
+  .section {
+    padding: 80px 0;
+  }
+  
+  .heading {
+    font-size: 36px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  .subheading {
+    font-size: 18px;
+    color: #666;
+    margin-bottom: 40px;
+  }
+  
+  .sub-heading {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  .developers-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 30px;
+  }
+  
+  .mentor-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 60px;
+  }
+  
+  .developer-card {
+    width: 180px;
+    margin: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .developer-photo {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+    object-fit: cover;
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .developer-card:hover .developer-photo {
+    transform: scale(1.1);
+  }
+  
+  .developer-name {
+    font-size: 16px;
+  }
+  
+  /* Scrollbar Styles */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+  }
+  

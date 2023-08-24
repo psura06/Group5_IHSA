@@ -1,25 +1,72 @@
-import React from 'react';
-import '../loginadminPage.css';
-import logo from '../assets/ihsalogo.png'; // replace this with your actual logo path
-import image from '../assets/horse login.jpg'; // replace this with your actual image path
+import React, { useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import NavBar from './NavBar';
+import logo from '../assets/ihsalogo.png';
+import image from '../assets/login/horse login.jpg';
+import '../stylings/loginadminPage.css';
 
-const LoginPage = () => {
+const LoginAdminPage = ({ setUserRole }) => {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const navigate = useNavigate();
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+
+    const loginData = {
+      username: username,
+      password: password,
+    };
+
+    axios
+      .post('/api/login', loginData)
+      .then((response) => {
+        const role = response.data && response.data.role;
+        if (role) {
+          localStorage.setItem('role', role);
+          setUserRole(role);
+          navigate('/');
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
   return (
     <div className="login-page">
-      <img src={logo} alt="logo" className="logo"/>
+      <NavBar />
+      <img src={logo} alt="logo" className="logo" />
       <div className="login-card">
         <h2>IHSA Admin Login</h2>
-        <label for="username">User Name</label>
-        <input id="username" type="text" placeholder="User Name"/>
-        <label for="password">Password</label>
-        <input id="password" type="password" placeholder="Password"/>
-        <button className="login-button">LOGIN</button>
+        <form onSubmit={handleLogin}>
+          <label htmlFor="username">User Name</label>
+          <input
+            id="username"
+            type="text"
+            placeholder="User Name"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <label htmlFor="password">Password</label>
+          <input
+            id="password"
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button className="login-button" type="submit">
+            LOGIN
+          </button>
+        </form>
         <div className="forgot-links">
           <a href="#">Forgot Username?</a>
           <a href="#">Forgot Password?</a>
         </div>
       </div>
-      <img src={image} alt="image" className="right-image"/>
+      <img src={image} alt="image" className="right-image" />
       <div className="footer-card">
         <p>2023 - IHSA</p>
       </div>
@@ -27,4 +74,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default LoginAdminPage;

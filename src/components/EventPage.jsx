@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import NavBar from './NavBar';
-import { getEvents } from '../api';
-import '../eventPage.css'; // Import the CSS file for EventPage
+import { getEvents } from './api';
+import moment from 'moment';
+import '../stylings/eventPage.css'; // Import the CSS file for EventPage
 
-const EventPage = () => {
+const EventPage = ({ userRole, handleLogout }) => {
   const location = useLocation();
   const eventId = location.pathname.split('/')[2];
   const [event, setEvent] = useState(null);
@@ -36,7 +37,7 @@ const EventPage = () => {
 
   return (
     <div className="event-page">
-      <NavBar />
+      <NavBar userRole={userRole} handleLogout={handleLogout} />
       <div className="event-image-container">
         <img src={event.image} alt={event.name} className="event-image" />
       </div>
@@ -45,10 +46,10 @@ const EventPage = () => {
         <p className="event-venue">Venue: {event.venue}</p>
         <div className="event-datetime">
           <div className="event-date-time">
-            <span className="datetime-label">Start Date/Time:</span> {event.start_date} {event.start_time}
+            <span className="datetime-label">Start Date/Time:</span> {moment(event.start_date).format('YYYY-MM-DD')} {event.start_time}
           </div>
           <div className="event-date-time">
-            <span className="datetime-label">End Date/Time:</span> {event.end_date} {event.end_time}
+            <span className="datetime-label">End Date/Time:</span> {moment(event.end_date).format('YYYY-MM-DD')} {event.end_time}
           </div>
         </div>
         <p className="event-description">{event.description}</p>

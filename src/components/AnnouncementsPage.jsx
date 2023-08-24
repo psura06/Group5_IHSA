@@ -1,26 +1,26 @@
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import '../announcementPage.css';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import '../stylings/announcementPage.css';
+import NavBar from './NavBar'
 
-export const announcements = [
-  { id: 1, title: 'Important Announcement', content: 'PASSING THE BATON: THE NEXT GENERATION OF COACHES EMERGE WITH WIN FIRSTS AT THE IHSA NATIONAL CHAMPIONSHIP HORSE SHOW.', date: '2023-05-28', time: '10:00 AM' },
-  { id: 2, title: 'New Update', content: 'THE RISE OF THE UNIVERSITY OF CONNECTICUT WESTERN TEAM', date: '2023-05-27', time: '02:30 PM' },
-  { id: 3, title: 'Upcoming Event', content: 'AWARDS PRESENTED ON FINAL DAY OF 2023 IHSA NATIONAL CHAMPIONSHIP HORSE SHOW.', date: '2023-05-26', time: '05:00 PM' },
-  // Add more announcements as needed
-];
-
-const AnnouncementsPage = () => {
+const AnnouncementsPage = ({ userRole, handleLogout }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
-  const { id } = useParams();
+  const [announcements, setAnnouncements] = useState([]);
 
-  const filteredAnnouncements = announcements
-    .filter((announcement) =>
-      announcement.title.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .filter((announcement) =>
-      selectedDate ? announcement.date === selectedDate : true
-    );
+  useEffect(() => {
+    axios.get('http://localhost:8000/api/announcements')
+      .then(response => {
+        // Convert date to 'yyyy-mm-dd' format right after fetching from the server
+        const formattedData = response.data.map(item => {
+          const date = new Date(item.date);
+          const formattedDate = date.toLocaleDateString('en-CA');
+          return { ...item, date: formattedDate };
+        });
+        setAnnouncements(formattedData);
+      })
+      .catch(error => console.log(error));
+  }, []);
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -38,27 +38,17 @@ const AnnouncementsPage = () => {
     setSelectedDate('');
   };
 
-  if (id) {
-    const announcement = announcements.find(
-      (announcement) => announcement.id === Number(id)
+  const filteredAnnouncements = announcements
+    .filter((announcement) =>
+      announcement.title.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .filter((announcement) =>
+      selectedDate ? announcement.date === selectedDate : true
     );
-
-    if (!announcement) {
-      return <div>Announcement not found.</div>;
-    }
-
-    return (
-      <div className="announcement-page">
-        <h1 className="announcement-title">{announcement.title}</h1>
-        <div className="announcement-content">
-          <p>{announcement.content}</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="announcements-page">
+      <NavBar userRole={userRole} handleLogout={handleLogout} />
       <h1 className="announcements-title">ANNOUNCEMENTS</h1>
       <div className="search-bar">
         <div className="search-container">

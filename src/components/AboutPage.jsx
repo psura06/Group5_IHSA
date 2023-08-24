@@ -1,10 +1,12 @@
 import React from 'react';
-import '../aboutPage.css';
+import '../stylings/aboutPage.css';
 import aboutImage from '../assets/events/event4.jpg';
+import NavBar from './NavBar'
 
-const AboutPage = () => {
+const AboutPage = ({ userRole, handleLogout }) => {
   return (
     <div className="about-page">
+        <NavBar userRole={userRole} handleLogout={handleLogout} />
       <h1 className="about-title">ABOUT US</h1>
       <div className="about-info">
         The Intercollegiate Horse Shows Association (IHSA), a non-profit group of men and women of various riding abilities,

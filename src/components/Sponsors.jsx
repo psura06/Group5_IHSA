@@ -18,7 +18,7 @@ import Sponsor13 from '../assets/sponsors/sponsor13.jpg';
 import Sponsor14 from '../assets/sponsors/sponsor14.jpg';
 import Sponsor15 from '../assets/sponsors/sponsor15.jpg';
 import Sponsor16 from '../assets/sponsors/sponsor16.jpg';
-import '../sponsors.css';
+import '../stylings/sponsors.css';
 
 const Sponsors = () => {
   const sponsorImages = [
