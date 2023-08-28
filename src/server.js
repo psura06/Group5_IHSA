@@ -8,7 +8,16 @@ const { body, validationResult } = require('express-validator');
 
 const app = express();
 
-app.use(cors());
+// Before defining your routes, configure CORS
+const corsOptions = {
+  origin: 'https://group5-ihsa.onrender.com', // Replace with your frontend URL
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true, // Enable credentials (cookies, headers) if needed
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions)); // Use the CORS middleware with the defined options
+
 app.use(express.json());
 
 app.use(express.static(path.join(__dirname, 'client/build')));
@@ -20,6 +29,7 @@ const connection = mysql.createConnection({
   database: process.env.DB_NAME,
   port: process.env.DB_PORT
 });
+
 
 connection.connect((err) => {
   if (err) {
