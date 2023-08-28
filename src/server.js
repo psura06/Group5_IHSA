@@ -10,7 +10,7 @@ const app = express();
 
 // Before defining your routes, configure CORS
 const corsOptions = {
-  origin: 'https://group5-ihsa.onrender.com', // Replace with your frontend URL
+  origin: '*', // Replace with your frontend URL
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true, // Enable credentials (cookies, headers) if needed
   optionsSuccessStatus: 204,
