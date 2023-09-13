@@ -18,6 +18,20 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
   const [newPassword, setNewPassword] = useState('');
   const [newRole, setNewRole] = useState('');
 
+  const fetchAdmins = async () => {
+    const res = await axios.get('/api/admins');
+    const dataWithIds = res.data.filter(admin => admin.username !== loggedInUser)
+      .map((admin, index) => ({ ...admin, role: 'admin', id: index + 1 })); // added role: 'admin'
+    setAdmins(dataWithIds);
+  };
+
+  const fetchShowAdmins = async () => {
+    const res = await axios.get('/api/showadmins');
+    const dataWithIds = res.data
+      .map((admin, index) => ({ ...admin, role: 'showadmin', id: index + 1 })); // added role: 'showadmin'
+    setShowAdmins(dataWithIds);
+  };
+
   const handleUserCreation = () => {
     if (!newUsername || !newPassword || !newRole) return;
 
@@ -26,14 +40,20 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
         setNewUsername('');
         setNewPassword('');
         setNewRole('');
-        window.location.reload();
+        // Fetch the updated user lists to reflect changes
+        fetchAdmins();
+        fetchShowAdmins();
       })
       .catch(err => console.error(err));
   };
 
   const handleMakeAdmin = (username) => {
     axios.put(`/api/makeAdmin/${username}`)
-      .then(() => window.location.reload())
+      .then(() => {
+        // Fetch the updated user lists to reflect changes
+        fetchAdmins();
+        fetchShowAdmins();
+      })
       .catch(err => console.error(err));
   };
 
@@ -52,10 +72,13 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
     }
 
     axios.put(endpoint)
-      .then(() => window.location.reload())
+      .then(() => {
+        // Fetch the updated user lists to reflect changes
+        fetchAdmins();
+        fetchShowAdmins();
+      })
       .catch(err => console.error(err));
   };
-
 
   useEffect(() => {
     const fetchAdmins = async () => {
@@ -176,6 +199,5 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
   );
 };
 
-
-
 export default UserManagementPage;
+

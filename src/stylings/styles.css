@@ -187,19 +187,32 @@ body {
 /* Styling for the card */
 .card {
   background-color: #ffffff;
-  padding: 1rem;
+  
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
   margin-left: 20px;
+  margin-right: 20px;
+  margin-bottom: 20px;
+  margin-top: 20px;
+  width: 250px;
 }
+.card.visible {
+  display: block;
+  width: 300px;
+  padding: 2rem;
+}
+
 
 /* Style for the tabs container */
 .tabs {
   display: flex;
   justify-content: space-between;
-  background-color: #000000;
+  background-color: #200a4d;
   border-bottom: 2px solid #777;
   padding: 3px 0;
   margin-bottom: 20px; /* Adjust the margin as needed */
+  
+  margin-left: 10px;
+  margin-right: 10px;
 }
 
 /* Style for each tab */
@@ -215,13 +228,13 @@ body {
 
 /* Style for the active tab */
 .tab.active {
-  background-color: #565353;
+  background-color: #312f2f;
   border-bottom: 2px solid #fff;
 }
 
 /* Add hover effect */
 .tab:hover {
-  background-color: #343335;
+  background-color: #a7a4ab;
 }
 
 .input-container {

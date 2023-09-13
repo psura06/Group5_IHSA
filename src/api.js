@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-// Use the REACT_APP_BACKEND_URL from the environment variables
-const API_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000/api';
+const API_URL = 'http://localhost:8000/api';
 
 export const getEvents = async () => {
   try {

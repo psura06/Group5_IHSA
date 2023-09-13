@@ -5,29 +5,27 @@ import axios from 'axios';
 import NavBar from './NavBar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog } from '@fortawesome/free-solid-svg-icons';
-
 import 'leaflet/dist/leaflet.css';
 import '../stylings/styles.css';
-
 // Import the pin icons
 import markerIconZone1 from '../assets/pins/pinredzone1.png';
 import markerIconZone2 from '../assets/pins/pinyellowzone2.png';
 import markerIconZone3 from '../assets/pins/pinbluezone3.png';
-import markerIconZone4 from '../assets/pins/pinblackzone4.png';
+import markerIconZone4 from '../assets/pins/pinskybluezone4.png';
 import markerIconZone5 from '../assets/pins/pingreenzone5.png';
 import markerIconZone6 from '../assets/pins/pinbrownzone6.png';
 import markerIconZone7 from '../assets/pins/pinpinkzone7.png';
-import markerIconZone8 from '../assets/pins/pinskybluezone8.png';
+import markerIconZone8 from '../assets/pins/pinblackzone8.png';
 
 // Import the flag icons
 import flagIconZone1 from '../assets/flags/flagredzone1.png';
 import flagIconZone2 from '../assets/flags/flagyellowzone2.png';
 import flagIconZone3 from '../assets/flags/flagbluezone3.png';
-import flagIconZone4 from '../assets/flags/flagblackzone4.png';
+import flagIconZone4 from '../assets/flags/flagskybluezone4.png';
 import flagIconZone5 from '../assets/flags/flaggreenzone5.png';
 import flagIconZone6 from '../assets/flags/flagbrownzone6.png';
 import flagIconZone7 from '../assets/flags/flagpinkzone7.png';
-import flagIconZone8 from '../assets/flags/flagskybluezone8.png';
+import flagIconZone8 from '../assets/flags/flagblackzone8.png';
 
 delete L.Icon.Default.prototype._getIconUrl;
 
@@ -38,15 +36,16 @@ L.Icon.Default.mergeOptions({
 });
 
 const zones = [
-  { id: 1, color: '#FF0000', markerIcon: markerIconZone1, flagIcon: flagIconZone1 },
-  { id: 2, color: '#FFA500', markerIcon: markerIconZone2, flagIcon: flagIconZone2 },
-  { id: 3, color: '#FFFF00', markerIcon: markerIconZone3, flagIcon: flagIconZone3 },
-  { id: 4, color: '#008000', markerIcon: markerIconZone4, flagIcon: flagIconZone4 },
-  { id: 5, color: '#0000FF', markerIcon: markerIconZone5, flagIcon: flagIconZone5 },
-  { id: 6, color: '#4B0082', markerIcon: markerIconZone6, flagIcon: flagIconZone6 },
-  { id: 7, color: '#800080', markerIcon: markerIconZone7, flagIcon: flagIconZone7 },
-  { id: 8, color: '#FF00FF', markerIcon: markerIconZone8, flagIcon: flagIconZone8 },
+  { id: 1, color: 'Red', markerIcon: markerIconZone1, flagIcon: flagIconZone1 },
+  { id: 2, color: 'Yellow', markerIcon: markerIconZone2, flagIcon: flagIconZone2 },
+  { id: 3, color: 'Blue', markerIcon: markerIconZone3, flagIcon: flagIconZone3 },
+  { id: 4, color: 'SkyBlue', markerIcon: markerIconZone4, flagIcon: flagIconZone4 },
+  { id: 5, color: 'Green', markerIcon: markerIconZone5, flagIcon: flagIconZone5 },
+  { id: 6, color: 'Brown', markerIcon: markerIconZone6, flagIcon: flagIconZone6 },
+  { id: 7, color: 'Pink', markerIcon: markerIconZone7, flagIcon: flagIconZone7 },
+  { id: 8, color: 'Black', markerIcon: markerIconZone8, flagIcon: flagIconZone8 },
 ];
+
 
 function MapLegend() {
   return (
@@ -86,7 +85,8 @@ function MapPage({ userRole, handleLogout }) {
   const [isAnchorSchoolInput, setIsAnchorSchoolInput] = useState('');
   const [regionNumberInput, setRegionNumberInput] = useState('');
   const [zoneNumberInput, setZoneNumberInput] = useState('');
-  const [mileageInput, setMileageInput] = useState('');
+  const [zonechairInput, setZoneChairInput] = useState('');
+  const [regionheadInput, setRegionHeadInput] = useState('');
 
   const mapRef = useRef();
 
@@ -244,7 +244,8 @@ function MapPage({ userRole, handleLogout }) {
       is_anchor_school: parseInt(isAnchorSchoolInput), // Parse to integer
       region_number: regionNumberInput, // Add regionNumberInput
       zone_number: zoneNumberInput, // Add zoneNumberInput
-      mileage: mileageInput, // Add mileageInput
+      zonechair: zonechairInput, // Add zonechair
+      regionhead: regionheadInput, // Add regionhead
       latitude: latitudeInput,
       longitude: longitudeInput,
     })
@@ -430,9 +431,17 @@ const handleButtonClick = () => {
                 <div className="input-container">
                   <input
                     type="text"
-                    placeholder="Enter Mileage"
-                    value={mileageInput}
-                    onChange={(e) => setMileageInput(e.target.value)}
+                    placeholder="Enter Zone Chair"
+                    value={zonechairInput}
+                    onChange={(e) => setZoneChairInput(e.target.value)}
+                  />
+                </div>
+                <div className="input-container">
+                  <input
+                    type="text"
+                    placeholder="Enter Region Head"
+                    value={regionheadInput}
+                    onChange={(e) => setRegionHeadInput(e.target.value)}
                   />
                 </div>
                 <div className="input-container">
@@ -478,9 +487,11 @@ const handleButtonClick = () => {
               <h2>{school.college_name}</h2>
               <p>Active riders: {school.active_riders}</p>
               <p>Is anchor school: {school.is_anchor_school ? 'Yes' : 'No'}</p>
-              <p>Mileage: {school.mileage}</p>
               <p>State name: {school.state_name}</p>
               <p>Region number: {school.region_number}</p>
+              <p>Zone number: {school.zone_number}</p>
+              <p>Zone chair: {school.zone_chair}</p>
+              <p>Region head: {school.region_head}</p>
             </Popup>
           </Marker>
         ))}
@@ -498,9 +509,8 @@ const handleButtonClick = () => {
                 <th>Is Anchor School</th>
                 <th>Region Number</th>
                 <th>Zone Number</th>
-                <th>Mileage</th>
-                <th>Latitude</th>
-                <th>Longitude</th>
+                <th>Zone Chair</th>
+                <th>Region hEad</th>
               </tr>
             </thead>
             <tbody>
@@ -517,9 +527,8 @@ const handleButtonClick = () => {
                   <td>{school.is_anchor_school ? 'Yes' : 'No'}</td>
                   <td>{school.region_number}</td>
                   <td>{school.zone_number}</td>
-                  <td>{school.mileage}</td>
-                  <td>{school.latitude}</td>
-                  <td>{school.longitude}</td>
+                  <td>{school.zone_chair}</td>
+                  <td>{school.region_head}</td>
                 </tr>
               ))}
             </tbody>

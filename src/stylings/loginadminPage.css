@@ -1,77 +1,103 @@
+/* Add these styles to center and reduce the size of the logo */
+.logo1 {
+  display: block;
+  margin: 0 auto 20px; /* Center the logo and add margin below it */
+  max-width: 120px; /* Set the maximum width for the logo */
+  height: auto; /* Allow the height to adjust automatically */
+}
+
+/* Rest of your existing CSS */
+
 .login-page {
-    background-color: white;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    position: relative;
-  }
-  
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  position: relative;
+}
+
+.login-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 1000px;
+}
+
+.login-card {
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  width: 100%;
+  box-sizing: border-box;
+  max-width: 300px; /* Set a maximum width for the card */
+}
+
+.right-image {
+  position: absolute;
+  bottom: 20px;
+  right: 1px; /* Add some space from the right edge */
+  height: 400px;
+  max-width: calc(40% - 80px); /* Set a maximum width for the image */
+}
+
+.login-card h1 {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.login-card label {
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.login-card input {
+  margin-bottom: 25px;
+  margin-top: 7px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.login-button {
+  background-color: #000080;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.forgot-links {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  color: blue;
+  font-size: small;
+}
+
+.footer-card {
+  position: absolute;
+  bottom: 2px;
+  background-color: white;
+  padding: 10px 20px;
+  border-radius: 0px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  font-weight: bold;
+  text-align: center;
+  width: 100%;
+  margin-top: 10px;
+}
+
+@media (max-width: 768px) {
   .right-image {
-    position: absolute;
-    bottom: 20px;
-    right: 0px;
-    height: 420px;
+    display: none;
   }
-  
-  .login-card {
-    background-color: white;
-    display: flex;
-    flex-direction: column;
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-    width: 300px;
-    box-sizing: border-box;
-  }
-  
-  .login-card h1 {
-    text-align: center;
-    margin-bottom: 40px;
-  }
-  
-  .login-card label {
-    font-weight: bold;
-    margin-top: 10px;
-  }
-  
-  .login-card input {
-    margin-bottom: 25px;
-    margin-top: 7px;
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-  }
-  
-  .login-button {
-    background-color: #000080;
-    color: white;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 5px;
-    margin-bottom: 5px;
-  }
-  
-  .forgot-links {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
-    color: blue;
-    font-size: small;
-  }
-  
-  .footer-card {
-    position: absolute;
-    bottom: 2px;
-    background-color: white;
-    padding: 10px 20px;
-    border-radius: 0px;
-    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-    font-weight: bold;
-    text-align: center;
-    width: 100%;
-  }
-  
+}

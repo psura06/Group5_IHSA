@@ -79,7 +79,7 @@ const NavBar = ({ userRole, handleLogout }) => {
             <RiUserFill size={20} /> Contact
           </Link>
         </li>
-      </ul>
+        <li>
       {userRole ? (
         <button className="login" onClick={handleLogout}>
           <RiLogoutBoxFill size={20} /> Logout
@@ -89,6 +89,8 @@ const NavBar = ({ userRole, handleLogout }) => {
           <RiUserFill size={20} /> Login
         </Link>
       )}
+      </li>
+      </ul>
     </div>
   );
 };

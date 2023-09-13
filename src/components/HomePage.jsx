@@ -77,32 +77,6 @@ const HomePage = ({ userRole, handleLogout }) => {
     autoplaySpeed: 2000,
   };
 
-  const scrollEventCards = (direction) => {
-    const container = eventCardContainerRef.current;
-    const card = container.firstChild;
-    const cardStyle = window.getComputedStyle(card);
-    const cardMarginRight = Number(cardStyle.marginRight.match(/\d+/g)[0]);
-    const cardWidth = card.offsetWidth + cardMarginRight;
-
-    if (container) {
-      const containerScrollPosition = container.scrollLeft;
-
-      if (direction === 'left') {
-        container.scrollTo({
-          top: 0,
-          left: containerScrollPosition - cardWidth,
-          behavior: 'smooth',
-        });
-      } else if (direction === 'right') {
-        container.scrollTo({
-          top: 0,
-          left: containerScrollPosition + cardWidth,
-          behavior: 'smooth',
-        });
-      }
-    }
-  };
-
   return (
     <div className="home-page">
       <NavBar userRole={userRole} handleLogout={handleLogout} />

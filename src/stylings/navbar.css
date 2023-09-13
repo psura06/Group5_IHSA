@@ -1,18 +1,20 @@
+/* Navbar Styles */
 .navbar {
   display: flex;
+  justify-content: space-between; /* Push buttons to the right and logo to the left */
   align-items: center;
-  justify-content: space-between;
   background-color: navy;
   color: white;
   padding: 1rem;
-  height: 60px;
   position: fixed;
   left: 0;
   top: 0;
   right: 0;
   z-index: 999;
-  width: calc(100% - 30px);
+  width: 100%;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  white-space: nowrap; /* Prevent button text from wrapping */
+  overflow-x: hidden; /* Hide horizontal scrollbar */
 }
 
 body {
@@ -20,34 +22,42 @@ body {
 }
 
 .logo {
-  width: 110px;
-  height: 60px;
+  max-width: 80px;
+  height: auto;
+  margin-left: 5px; /* Add margin to the left of the logo */
 }
 
 .menu {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
   list-style: none;
+  white-space: nowrap; /* Prevent button text from wrapping */
+  gap: 0.3rem; /* Adjust the gap between buttons */
+  margin-right: 20px; /* Add margin to the right of the buttons */
 }
 
 .menu li {
   display: flex;
   align-items: center;
-  white-space: nowrap;
 }
 
-.navbar a {
+.menu a {
   color: white;
   text-decoration: none;
-  font-size: 14px;
+  font-size: 11px; /* Decrease font size for smaller buttons */
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: center; /* Center icon and text vertically */
+  padding: 0.2rem; /* Adjust padding for better spacing */
 }
 
-.navbar a:hover::after, .navbar a:focus::after, .navbar a:active::after, 
-.login:hover::after, .login:focus::after, .login:active::after {
+.navbar a svg {
+  margin-right: 0.2rem; /* Add space between icon and text */
+  width: 12px; /* Decrease the icon size */
+  height: 12px;
+}
+
+.menu a:hover::after {
   content: "";
   position: absolute;
   top: 50%;
@@ -60,30 +70,28 @@ body {
   z-index: -1;
 }
 
-.navbar a svg {
-  margin-right: 0.2rem;
-  width: 14px;
-  height: 14px;
-}
-
-.menu li:not(:last-child) {
-  margin-right: 0.6rem;
-}
-
 .login {
   background: transparent;
   color: white;
+  text-decoration: none;
+  font-size: 11px; /* Decrease font size for smaller buttons */
+  position: relative;
+  border: none;
   display: flex;
   align-items: center;
-  justify-content: center;
-  border: none;
-  padding: 0.2rem 0.4rem;
-  margin-left: 1rem;
-  text-decoration: none;
-  position: relative;
+  padding: 0.3rem; /* Adjust padding for better spacing */
+  margin-right: 10px; /* Add space to the right of the last button */
 }
 
-.logo-link {
-  margin-right: auto;
-  margin-left: 1rem;
+.login:hover::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 2rem;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 5px;
+  z-index: -1;
 }
