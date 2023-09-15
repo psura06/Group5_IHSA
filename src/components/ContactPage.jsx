@@ -13,12 +13,12 @@ import FellahImage from '../assets/developers/fellah.png';
 import HeroImage from '../assets/developers/contact-hero.jpg';
 
 const developers = [
-  { name: 'Shiva Vangari', designation: 'Team Lead - Front End', photo: VangariImage },
-  { name: 'Vedha Sri Gaddam', designation: 'Front End', photo: GaddamImage },
-  { name: 'Kiran Kadali', designation: 'Back End', photo: KadaliImage },
-  { name: 'Sai Kiran Pendli', designation: 'Back End', photo: PendliImage },
-  { name: 'Ambica Peruru', designation: 'Database - Scrum Master', photo: PeruruImage },
-  { name: 'Pooja Sura', designation: 'Database - Project Manager', photo: SuraImage }
+  { name: 'Shiva Vangari', designation: 'TEAM LEAD/ DEVELOPER', photo: VangariImage },
+  { name: 'Vedha Sri Gaddam', designation: 'FRONTEND', photo: GaddamImage },
+  { name: 'Kiran Kadali', designation: 'DATABASE', photo: KadaliImage },
+  { name: 'Sai Kiran Pendli', designation: 'DATABASE', photo: PendliImage },
+  { name: 'Ambica Peruru', designation: 'BACKEND', photo: PeruruImage },
+  { name: 'Pooja Sura', designation: 'FRONTEND', photo: SuraImage }
 ];
 
 const ContactPage = ({ userRole, handleLogout }) => {
