@@ -51,46 +51,81 @@ const RandomizePage = ({ userRole, handleLogout }) => {
       return;
     }
 
-    let ridersClasses = {};
-    let horsesClasses = {};
-    for (let rider of ridersFile) {
-      if (!ridersClasses[rider['Class']]) {
-        ridersClasses[rider['Class']] = [];
+    try {
+      // Ensure that the data is parsed correctly
+      const parsedRiders = JSON.parse(JSON.stringify(ridersFile));
+      const parsedHorses = JSON.parse(JSON.stringify(horsesFile));
+
+      // Extract class names from riders and horses data
+      const riderClassNames = [...new Set(parsedRiders.map((rider) => rider['Class']))]
+        .filter(Boolean); // Filter out undefined or empty class names
+      const horseClassNames = [...new Set(parsedHorses.map((horse) => horse['Class']))]
+        .filter(Boolean); // Filter out undefined or empty class names
+
+      console.log('Rider Class Names:', riderClassNames);
+      console.log('Horse Class Names:', horseClassNames);
+
+      // Combine all class names from both datasets
+      const allClassNames = [...new Set([...riderClassNames, ...horseClassNames])];
+
+      console.log('All Class Names:', allClassNames);
+
+      let results = [];
+      for (let classKey of allClassNames) {
+        let ridersInClass = parsedRiders.filter((rider) => rider['Class'] === classKey) || [];
+        let horsesInClass = parsedHorses.filter((horse) => horse['Class'] === classKey) || [];
+
+        console.log('Class Name:', classKey);
+        console.log('Riders Count:', ridersInClass.length);
+        console.log('Horses Count:', horsesInClass.length);
+
+        // Filter horses based on MaxWeight >= Weight of the rider
+        ridersInClass.sort(() => Math.random() - 0.5);
+        horsesInClass.sort((a, b) => a['MaxWeight'] - b['MaxWeight']); // Sort horses by MaxWeight
+
+        console.log('Filtered Riders Count:', ridersInClass.length);
+        console.log('Filtered Horses Count:', horsesInClass.length);
+
+        let classResult = [];
+        let uniqueHorsesUsed = new Set();
+
+        for (let rider of ridersInClass) {
+          let horse = horsesInClass.find(
+            (h) => !uniqueHorsesUsed.has(h['Horse Name']) && h['MaxWeight'] >= rider['Weight']
+          );
+
+          if (!horse) {
+            // If no unique horse matches the condition, get the first available horse
+            horse = horsesInClass.find((h) => h['MaxWeight'] >= rider['Weight']);
+          }
+
+          if (horse) {
+            classResult.push({
+              Placing: classResult.length + 1,
+              Number: rider['ID'] || '', // Use the 'ID' field from your Excel file
+              'Rider Name': rider['Rider Name'] || '', // Use the 'Rider Name' field from your Excel file
+              School: rider['School'] || '', // Use the 'School' field from your Excel file
+              'Draw Order': classResult.length + 1, // Changed the draw order logic
+              'Horse Name': horse['Horse Name'] || '',
+              'Horse Provider': horse['Provider'] || '',
+            });
+
+            uniqueHorsesUsed.add(horse['Horse Name']);
+          }
+        }
+
+        results.push({
+          className: classKey || '',
+          data: classResult,
+        });
       }
-      ridersClasses[rider['Class']].push(rider);
+
+      console.log('Results:', results);
+
+      setTableData(results);
+    } catch (error) {
+      console.error('Error while processing data:', error);
     }
-    for (let horse of horsesFile) {
-      if (!horsesClasses[horse['Class']]) {
-        horsesClasses[horse['Class']] = [];
-      }
-      horsesClasses[horse['Class']].push(horse);
-    }
-
-    let results = [];
-    for (let classKey in ridersClasses) {
-      let ridersInClass = JSON.parse(JSON.stringify(ridersClasses[classKey]));
-      let horsesInClass = JSON.parse(JSON.stringify(horsesClasses[classKey]));
-
-      ridersInClass.sort(() => Math.random() - 0.5);
-      horsesInClass.sort(() => Math.random() - 0.5);
-
-      let classResult = ridersInClass.map((rider, index) => ({
-        Placing: index + 1,
-        Number: Math.floor(Math.random() * 1000),
-        'Rider Name': rider['Rider Name'],
-        School: rider['School'],
-        'Draw Order': index + 1, // Changed the draw order logic
-        'Horse Name': horsesInClass[index % horsesInClass.length]['Horse Name'], // Fixed the horse assignment logic
-        'Horse Provider': horsesInClass[index % horsesInClass.length]['Provider'], // Fixed the horse assignment logic
-      }));
-
-      results.push({
-        className: classKey,
-        data: classResult,
-      });
-    }
-
-    setTableData(results);
   };
 
   const handleDownloadTable = async () => {
@@ -101,28 +136,26 @@ const RandomizePage = ({ userRole, handleLogout }) => {
 
     // Create a new ExcelJS workbook
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Sheet1');
 
-    // Define the table header
-    const header = [
-      'Class', // Add Class column
-      'Placing',
-      'Number',
-      'Rider Name',
-      'School',
-      'Draw Order',
-      'Horse Name',
-      'Horse Provider',
-    ];
-
-    // Add the header row to the worksheet
-    worksheet.addRow(header);
-
-    // Add data rows to the worksheet
     tableData.forEach((result) => {
+      const worksheet = workbook.addWorksheet(result.className); // Create a worksheet for each class
+
+      // Define the table header
+      const header = [
+        'Placing',
+        'Number',
+        'Rider Name',
+        'School',
+        'Draw Order',
+        'Horse Name',
+        'Horse Provider',
+      ];
+
+      // Add the header row to the worksheet
+      worksheet.addRow(header);
+
       result.data.forEach((data) => {
         worksheet.addRow([
-          result.className, // Add Class value
           data.Placing,
           data.Number,
           data['Rider Name'],
@@ -167,39 +200,38 @@ const RandomizePage = ({ userRole, handleLogout }) => {
           </button>
         </div>
         <div className="resultsContainer">
-          <div className="resultsTableContainer">
-            {tableData.map((result, index) => (
-              <div key={index} className="resultsTable">
-                <h2>{result.className}</h2>
-                <Table celled>
-                  <Table.Header>
-                    <Table.Row>
-                      <Table.HeaderCell>Placing</Table.HeaderCell>
-                      <Table.HeaderCell>Number</Table.HeaderCell>
-                      <Table.HeaderCell>Rider Name</Table.HeaderCell>
-                      <Table.HeaderCell>School</Table.HeaderCell>
-                      <Table.HeaderCell>Draw Order</Table.HeaderCell>
-                      <Table.HeaderCell>Horse Name</Table.HeaderCell>
-                      <Table.HeaderCell>Horse Provider</Table.HeaderCell>
+          {/* Display the tables here */}
+          {tableData.map((result, index) => (
+            <div key={index} className="resultsTable">
+              <h2>{result.className}</h2>
+              <Table celled>
+                <Table.Header>
+                  <Table.Row>
+                    <Table.HeaderCell>Placing</Table.HeaderCell>
+                    <Table.HeaderCell>Number</Table.HeaderCell>
+                    <Table.HeaderCell>Rider Name</Table.HeaderCell>
+                    <Table.HeaderCell>School</Table.HeaderCell>
+                    <Table.HeaderCell>Draw Order</Table.HeaderCell>
+                    <Table.HeaderCell>Horse Name</Table.HeaderCell>
+                    <Table.HeaderCell>Horse Provider</Table.HeaderCell>
+                  </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                  {result.data.map((data, dataIndex) => (
+                    <Table.Row key={dataIndex}>
+                      <Table.Cell>{data.Placing}</Table.Cell>
+                      <Table.Cell>{data.Number}</Table.Cell>
+                      <Table.Cell>{data['Rider Name']}</Table.Cell>
+                      <Table.Cell>{data.School}</Table.Cell>
+                      <Table.Cell>{data['Draw Order']}</Table.Cell>
+                      <Table.Cell>{data['Horse Name']}</Table.Cell>
+                      <Table.Cell>{data['Horse Provider']}</Table.Cell>
                     </Table.Row>
-                  </Table.Header>
-                  <Table.Body>
-                    {result.data.map((data, index) => (
-                      <Table.Row key={index}>
-                        <Table.Cell>{data.Placing}</Table.Cell>
-                        <Table.Cell>{data.Number}</Table.Cell>
-                        <Table.Cell>{data['Rider Name']}</Table.Cell>
-                        <Table.Cell>{data.School}</Table.Cell>
-                        <Table.Cell>{data['Draw Order']}</Table.Cell>
-                        <Table.Cell>{data['Horse Name']}</Table.Cell>
-                        <Table.Cell>{data['Horse Provider']}</Table.Cell>
-                      </Table.Row>
-                    ))}
-                  </Table.Body>
-                </Table>
-              </div>
-            ))}
-          </div>
+                  ))}
+                </Table.Body>
+              </Table>
+            </div>
+          ))}
         </div>
       </div>
     </div>
