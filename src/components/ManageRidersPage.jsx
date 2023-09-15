@@ -6,94 +6,91 @@ import ExcelJS from 'exceljs';
 
 const ManageRidersPage = ({ userRole, handleLogout }) => {
   const [selectedClass, setSelectedClass] = useState('');
+  const [riderID, setRiderID] = useState('');
   const [riderName, setRiderName] = useState('');
   const [school, setSchool] = useState('');
+  const [weight, setWeight] = useState('');
+  const [height, setHeight] = useState('');
   const [riderData, setRiderData] = useState({});
 
   const classes = [
-    'Class 1 - Reining',
-    'Class 2 - Level I (Sec. A)',
-    'Class 3 - Ranch Riding',
-    'Class 4 - Level I (Sec. B)',
-    'Class 5 - Open Horsemanship',
-    'Class 6 - Rookie B (Sec. A)',
-    'Class 7 - Level II (Sec. A)',
-    'Class 8 - Level I (Sec. C)',
-    'Class 9 - Rookie B (Sec. B)',
-    'Class 10 - Level II (Sec. B)',
-    'Class 11 - Rookie B (Sec. C)',
-    'Class 12 - Beginner (Sec. A)',
-    'Class 13 - Rookie B (Sec. D)',
-    'Class 14 - Beginner (Sec. B)',
-    'Class 15 - Rookie A',
-    'Class 16 - Beginner (Sec. C)',
-    'Class 17 - Alumni',
-    'Class 18 - Beginner (Sec. D)',
+    'Class 1 Introductory Hunter Seat Equitation',
+    'Class 2A Pre-Novice Hunter Seat Equitation',
+    'Class 2B Novice Hunter Seat Equitation',
+    'Class 3 Limit Hunter Seat Equitation on the Flat',
+    'Class 4 Limit Hunter Seat Equitation over Fences',
+    'Class 5 Intermediate Hunter Seat Equitation on the Flat',
+    'Class 6 Intermediate Hunter Seat Equitation over Fences',
+    'Class 7 Open Hunter Seat Equitation on the Flat',
+    'Class 8 Open Hunter Seat Equitation over Fences',
+    'Class 9 Alumni Hunter Seat Equitation on the Flat',
+    'Class 10 Alumni Hunter Seat Equitation over Fences',
+    'Class 11 Beginner Western Horsemanship',
+    'Class 12A Rookie A Western Horsemanship',
+    'Class 12B Rookie B Western Horsemanship',
+    'Class 13 Level I Western Horsemanship',
+    'Class 14 Level II Western Horsemanship',
+    'Class 15 Level II Ranch Riding',
+    'Class 16 Open Western Horsemanship',
+    'Class 17 Open Reining',
+    'Class 18 Alumni Western Horsemanship',
+    'Class 19 Alumni Ranch Riding'
   ];
 
   const handleAddRider = () => {
-    if (selectedClass && riderName && school) {
-      // Create a new rider object
+    if (selectedClass && riderID && riderName && school && weight && height) {
       const newRider = {
-        'Rider Name': riderName, // Change "Name" to "Rider Name"
-        School: school, // No change needed for "School"
+        'ID': riderID,
+        'Rider Name': riderName,
+        'School': school,
+        'Weight': weight,
+        'Height': height,
       };
 
-      // Create a copy of the riderData object
       const updatedData = { ...riderData };
 
-      // Check if the class already exists in the riderData
       if (updatedData[selectedClass]) {
-        // Check if the same rider data already exists, and if not, add it
-        if (!updatedData[selectedClass].some((rider) => rider['Rider Name'] === riderName && rider.School === school)) {
+        if (!updatedData[selectedClass].some((rider) => rider['ID'] === riderID)) {
           updatedData[selectedClass].push(newRider);
         }
       } else {
-        // If the class does not exist, create a new array
         updatedData[selectedClass] = [newRider];
       }
 
-      // Update the state with the new riderData
       setRiderData(updatedData);
 
-      // Clear input fields
       setSelectedClass('');
+      setRiderID('');
       setRiderName('');
       setSchool('');
+      setWeight('');
+      setHeight('');
     }
   };
 
   const handleDownloadTable = () => {
-    // Create a new Excel workbook
     const workbook = new ExcelJS.Workbook();
-
-    // Add a worksheet
     const worksheet = workbook.addWorksheet('RiderData');
 
-    // Add headers to the worksheet
-    worksheet.addRow(['Class', 'Rider Name', 'School']); // Change "Name" to "Rider Name"
+    worksheet.addRow(['Class', 'ID', 'Rider Name', 'School', 'Weight', 'Height']);
 
-    // Populate the worksheet with rider data
     classes.forEach((className) => {
       if (riderData[className]) {
         riderData[className].forEach((rider) => {
-          worksheet.addRow([className, rider['Rider Name'], rider.School]); // Change "Name" to "Rider Name"
+          worksheet.addRow([className, rider['ID'], rider['Rider Name'], rider['School'], rider['Weight'], rider['Height']]);
         });
       }
     });
 
-    // Create a Blob containing the Excel file data
     workbook.xlsx.writeBuffer().then((buffer) => {
       const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const url = window.URL.createObjectURL(blob);
 
-      // Create a temporary anchor element to trigger the download
       const a = document.createElement('a');
       a.href = url;
       a.download = 'rider_data.xlsx';
       a.click();
 
-      // Clean up
       window.URL.revokeObjectURL(url);
     });
   };
@@ -110,13 +107,11 @@ const ManageRidersPage = ({ userRole, handleLogout }) => {
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
 
-        // Convert the worksheet data into an array of objects
         const excelData = XLSX.utils.sheet_to_json(worksheet);
 
-        // Process the data and update the riderData state
         excelData.forEach((row) => {
-          const { Class, School } = row; // Change "Name" to "Rider Name"
-          const newRider = { 'Rider Name': row['Rider Name'], School: School }; // Change "Name" to "Rider Name"
+          const { Class, ID, 'Rider Name': riderName, School, Weight, Height } = row;
+          const newRider = { 'ID': ID, 'Rider Name': riderName, 'School': School, 'Weight': Weight, 'Height': Height };
 
           if (riderData[Class]) {
             riderData[Class].push(newRider);
@@ -125,7 +120,6 @@ const ManageRidersPage = ({ userRole, handleLogout }) => {
           }
         });
 
-        // Update the state with the new riderData
         setRiderData({ ...riderData });
       };
 
@@ -133,7 +127,6 @@ const ManageRidersPage = ({ userRole, handleLogout }) => {
     }
   };
 
-  // Check if all classes have at least one record
   const allClassesHaveRecords = classes.every((className) => !!riderData[className] && riderData[className].length > 0);
 
   return (
@@ -157,6 +150,12 @@ const ManageRidersPage = ({ userRole, handleLogout }) => {
         </DropdownBox>
         <InputBox
           type="text"
+          placeholder="Enter Rider ID"
+          value={riderID}
+          onChange={(e) => setRiderID(e.target.value)}
+        />
+        <InputBox
+          type="text"
           placeholder="Enter Rider Name"
           value={riderName}
           onChange={(e) => setRiderName(e.target.value)}
@@ -166,6 +165,18 @@ const ManageRidersPage = ({ userRole, handleLogout }) => {
           placeholder="Enter School"
           value={school}
           onChange={(e) => setSchool(e.target.value)}
+        />
+        <InputBox
+          type="text"
+          placeholder="Enter Weight"
+          value={weight}
+          onChange={(e) => setWeight(e.target.value)}
+        />
+        <InputBox
+          type="text"
+          placeholder="Enter Height"
+          value={height}
+          onChange={(e) => setHeight(e.target.value)}
         />
         <Button onClick={handleAddRider}>Add</Button>
         <DownloadButton
@@ -186,18 +197,24 @@ const ManageRidersPage = ({ userRole, handleLogout }) => {
               <ClassTable>
                 <thead>
                   <tr>
-                    <th colSpan="2">{className}</th>
+                    <th colSpan="6">{className}</th>
                   </tr>
                   <tr>
+                    <th>ID</th>
                     <th>Rider Name</th>
                     <th>School</th>
+                    <th>Weight</th>
+                    <th>Height</th>
                   </tr>
                 </thead>
                 <tbody>
                   {riderData[className].map((rider, riderIndex) => (
                     <tr key={riderIndex}>
+                      <td>{rider['ID']}</td>
                       <td>{rider['Rider Name']}</td>
-                      <td>{rider.School}</td>
+                      <td>{rider['School']}</td>
+                      <td>{rider['Weight']}</td>
+                      <td>{rider['Height']}</td>
                     </tr>
                   ))}
                 </tbody>

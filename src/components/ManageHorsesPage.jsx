@@ -8,92 +8,96 @@ const ManageHorsesPage = ({ userRole, handleLogout }) => {
   const [selectedClass, setSelectedClass] = useState('');
   const [horseName, setHorseName] = useState('');
   const [provider, setProvider] = useState('');
+  const [maxWeight, setMaxWeight] = useState('');
+  const [description, setDescription] = useState('');
+  const [reign, setReign] = useState('');
+  const [spurs, setSpurs] = useState('');
   const [horseData, setHorseData] = useState({});
 
   const classes = [
-    'Class 1 - Reining',
-    'Class 2 - Level I (Sec. A)',
-    'Class 3 - Ranch Riding',
-    'Class 4 - Level I (Sec. B)',
-    'Class 5 - Open Horsemanship',
-    'Class 6 - Rookie B (Sec. A)',
-    'Class 7 - Level II (Sec. A)',
-    'Class 8 - Level I (Sec. C)',
-    'Class 9 - Rookie B (Sec. B)',
-    'Class 10 - Level II (Sec. B)',
-    'Class 11 - Rookie B (Sec. C)',
-    'Class 12 - Beginner (Sec. A)',
-    'Class 13 - Rookie B (Sec. D)',
-    'Class 14 - Beginner (Sec. B)',
-    'Class 15 - Rookie A',
-    'Class 16 - Beginner (Sec. C)',
-    'Class 17 - Alumni',
-    'Class 18 - Beginner (Sec. D)',
+    'Class 1 Introductory Hunter Seat Equitation',
+    'Class 2A Pre-Novice Hunter Seat Equitation',
+    'Class 2B Novice Hunter Seat Equitation',
+    'Class 3 Limit Hunter Seat Equitation on the Flat',
+    'Class 4 Limit Hunter Seat Equitation over Fences',
+    'Class 5 Intermediate Hunter Seat Equitation on the Flat',
+    'Class 6 Intermediate Hunter Seat Equitation over Fences',
+    'Class 7 Open Hunter Seat Equitation on the Flat',
+    'Class 8 Open Hunter Seat Equitation over Fences',
+    'Class 9 Alumni Hunter Seat Equitation on the Flat',
+    'Class 10 Alumni Hunter Seat Equitation over Fences',
+    'Class 11 Beginner Western Horsemanship',
+    'Class 12A Rookie A Western Horsemanship',
+    'Class 12B Rookie B Western Horsemanship',
+    'Class 13 Level I Western Horsemanship',
+    'Class 14 Level II Western Horsemanship',
+    'Class 15 Level II Ranch Riding',
+    'Class 16 Open Western Horsemanship',
+    'Class 17 Open Reining',
+    'Class 18 Alumni Western Horsemanship',
+    'Class 19 Alumni Ranch Riding'
   ];
 
+  // Define options for the Reign and Spurs dropdowns
+  const reignOptions = ['1 Hand', '2 Hands'];
+  const spursOptions = ['Ball', 'Optional', 'Optional Ball', 'Optional Rowel', 'Rowel', 'Rowel or Ball'];
+
   const handleAddHorse = () => {
-    if (selectedClass && horseName && provider) {
-      // Create a new horse object with "Horse Name"
+    if (selectedClass && horseName && provider && maxWeight && description && reign && spurs) {
       const newHorse = {
-        'Horse Name': horseName, // Change "name" to "Horse Name"
-        Provider: provider, // Keep "Provider" as it is
+        'Horse Name': horseName,
+        Provider: provider,
+        'Max Weight': maxWeight,
+        Description: description,
+        Reign: reign,
+        Spurs: spurs,
       };
 
-      // Create a copy of the horseData object
       const updatedData = { ...horseData };
 
-      // Check if the class already exists in the horseData
       if (updatedData[selectedClass]) {
-        // Check if the same horse data already exists, and if not, add it
         if (!updatedData[selectedClass].some((horse) => horse['Horse Name'] === horseName && horse.Provider === provider)) {
           updatedData[selectedClass].push(newHorse);
         }
       } else {
-        // If the class does not exist, create a new array
         updatedData[selectedClass] = [newHorse];
       }
 
-      // Update the state with the new horseData
       setHorseData(updatedData);
 
-      // Clear input fields
       setSelectedClass('');
       setHorseName('');
       setProvider('');
+      setMaxWeight('');
+      setDescription('');
+      setReign('');
+      setSpurs('');
     }
   };
 
   const handleDownloadTable = () => {
-    // Create a new Excel workbook
     const workbook = new ExcelJS.Workbook();
-
-    // Add a worksheet
     const worksheet = workbook.addWorksheet('HorseData');
 
-    // Add headers to the worksheet
-    worksheet.addRow(['Class', 'Horse Name', 'Provider']); // Change "Name" to "Horse Name"
+    worksheet.addRow(['Class', 'Horse Name', 'Provider', 'Max Weight', 'Description', 'Reign', 'Spurs']);
 
-    // Populate the worksheet with horse data
     classes.forEach((className) => {
       if (horseData[className]) {
         horseData[className].forEach((horse) => {
-          worksheet.addRow([className, horse['Horse Name'], horse.Provider]); // Change "name" to "Horse Name"
+          worksheet.addRow([className, horse['Horse Name'], horse.Provider, horse['Max Weight'], horse.Description, horse.Reign, horse.Spurs]);
         });
       }
     });
 
-    // Create a Blob containing the Excel file data
     workbook.xlsx.writeBuffer().then((buffer) => {
       const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const url = window.URL.createObjectURL(blob);
 
-      // Create a temporary anchor element to trigger the download
       const a = document.createElement('a');
       a.href = url;
       a.download = 'horse_data.xlsx';
       a.click();
 
-      // Clean up
       window.URL.revokeObjectURL(url);
     });
   };
@@ -110,13 +114,11 @@ const ManageHorsesPage = ({ userRole, handleLogout }) => {
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
 
-        // Convert the worksheet data into an array of objects
         const excelData = XLSX.utils.sheet_to_json(worksheet);
 
-        // Process the data and update the horseData state
         excelData.forEach((row) => {
-          const { Class,  Provider } = row; // Change "Name" to "Horse Name"
-          const newHorse = { 'Horse Name': row['Horse Name'], Provider: Provider }; // Change "name" to "Horse Name"
+          const { Class, Provider, 'Horse Name': horseName, 'Max Weight': maxWeight, Description, Reign, Spurs } = row;
+          const newHorse = { 'Horse Name': horseName, Provider, 'Max Weight': maxWeight, Description, Reign, Spurs };
 
           if (horseData[Class]) {
             horseData[Class].push(newHorse);
@@ -125,7 +127,6 @@ const ManageHorsesPage = ({ userRole, handleLogout }) => {
           }
         });
 
-        // Update the state with the new horseData
         setHorseData({ ...horseData });
       };
 
@@ -133,7 +134,6 @@ const ManageHorsesPage = ({ userRole, handleLogout }) => {
     }
   };
 
-  // Check if all classes have at least one record
   const allClassesHaveRecords = classes.every((className) => !!horseData[className] && horseData[className].length > 0);
 
   return (
@@ -167,6 +167,46 @@ const ManageHorsesPage = ({ userRole, handleLogout }) => {
           value={provider}
           onChange={(e) => setProvider(e.target.value)}
         />
+        <InputBox
+          type="text"
+          placeholder="Enter Max Weight"
+          value={maxWeight}
+          onChange={(e) => setMaxWeight(e.target.value)}
+        />
+        <InputBox
+          type="text"
+          placeholder="Enter Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+        <DropdownBox
+          value={reign}
+          onChange={(e) => setReign(e.target.value)}
+          placeholder="Select Reign"
+        >
+          <option value="" disabled>
+            Select Reign
+          </option>
+          {reignOptions.map((option, index) => (
+            <option key={index} value={option}>
+              {option}
+            </option>
+          ))}
+        </DropdownBox>
+        <DropdownBox
+          value={spurs}
+          onChange={(e) => setSpurs(e.target.value)}
+          placeholder="Select Spurs"
+        >
+          <option value="" disabled>
+            Select Spurs
+          </option>
+          {spursOptions.map((option, index) => (
+            <option key={index} value={option}>
+              {option}
+            </option>
+          ))}
+        </DropdownBox>
         <Button onClick={handleAddHorse}>Add</Button>
         <DownloadButton
           onClick={handleDownloadTable}
@@ -186,18 +226,26 @@ const ManageHorsesPage = ({ userRole, handleLogout }) => {
               <ClassTable>
                 <thead>
                   <tr>
-                    <th colSpan="2">{className}</th>
+                    <th colSpan="7">{className}</th>
                   </tr>
                   <tr>
-                    <th>Horse Name</th> {/* Change "Name" to "Horse Name" */}
+                    <th>Horse Name</th>
                     <th>Provider</th>
+                    <th>Max Weight</th>
+                    <th>Description</th>
+                    <th>Reign</th>
+                    <th>Spurs</th>
                   </tr>
                 </thead>
                 <tbody>
                   {horseData[className].map((horse, horseIndex) => (
                     <tr key={horseIndex}>
-                      <td>{horse['Horse Name']}</td> {/* Change "name" to "Horse Name" */}
-                      <td>{horse.Provider}</td> {/* Keep "Provider" as it is */}
+                      <td>{horse['Horse Name']}</td>
+                      <td>{horse.Provider}</td>
+                      <td>{horse['Max Weight']}</td>
+                      <td>{horse.Description}</td>
+                      <td>{horse.Reign}</td>
+                      <td>{horse.Spurs}</td>
                     </tr>
                   ))}
                 </tbody>
