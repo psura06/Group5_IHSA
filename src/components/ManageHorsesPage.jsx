@@ -47,7 +47,7 @@ const ManageHorsesPage = ({ userRole, handleLogout }) => {
       const newHorse = {
         'Horse Name': horseName,
         Provider: provider,
-        'Max Weight': maxWeight,
+        MaxWeight: maxWeight, // Use 'MaxWeight' without a space
         Description: description,
         Reign: reign,
         Spurs: spurs,
@@ -79,12 +79,12 @@ const ManageHorsesPage = ({ userRole, handleLogout }) => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('HorseData');
 
-    worksheet.addRow(['Class', 'Horse Name', 'Provider', 'Max Weight', 'Description', 'Reign', 'Spurs']);
+    worksheet.addRow(['Class', 'Horse Name', 'Provider', 'MaxWeight', 'Description', 'Reign', 'Spurs']);
 
     classes.forEach((className) => {
       if (horseData[className]) {
         horseData[className].forEach((horse) => {
-          worksheet.addRow([className, horse['Horse Name'], horse.Provider, horse['Max Weight'], horse.Description, horse.Reign, horse.Spurs]);
+          worksheet.addRow([className, horse['Horse Name'], horse.Provider, horse.MaxWeight, horse.Description, horse.Reign, horse.Spurs]);
         });
       }
     });
@@ -117,8 +117,8 @@ const ManageHorsesPage = ({ userRole, handleLogout }) => {
         const excelData = XLSX.utils.sheet_to_json(worksheet);
 
         excelData.forEach((row) => {
-          const { Class, Provider, 'Horse Name': horseName, 'Max Weight': maxWeight, Description, Reign, Spurs } = row;
-          const newHorse = { 'Horse Name': horseName, Provider, 'Max Weight': maxWeight, Description, Reign, Spurs };
+          const { Class, Provider, 'Horse Name': horseName, MaxWeight, Description, Reign, Spurs } = row;
+          const newHorse = { 'Horse Name': horseName, Provider, MaxWeight, Description, Reign, Spurs };
 
           if (horseData[Class]) {
             horseData[Class].push(newHorse);
@@ -242,7 +242,7 @@ const ManageHorsesPage = ({ userRole, handleLogout }) => {
                     <tr key={horseIndex}>
                       <td>{horse['Horse Name']}</td>
                       <td>{horse.Provider}</td>
-                      <td>{horse['Max Weight']}</td>
+                      <td>{horse.MaxWeight}</td> {/* Use 'MaxWeight' without a space */}
                       <td>{horse.Description}</td>
                       <td>{horse.Reign}</td>
                       <td>{horse.Spurs}</td>

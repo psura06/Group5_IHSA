@@ -12,6 +12,8 @@ const ManageRidersPage = ({ userRole, handleLogout }) => {
   const [weight, setWeight] = useState('');
   const [height, setHeight] = useState('');
   const [riderData, setRiderData] = useState({});
+  const [editMode, setEditMode] = useState(false);
+  const [editRow, setEditRow] = useState(null);
 
   const classes = [
     'Class 1 Introductory Hunter Seat Equitation',
@@ -40,17 +42,17 @@ const ManageRidersPage = ({ userRole, handleLogout }) => {
   const handleAddRider = () => {
     if (selectedClass && riderID && riderName && school && weight && height) {
       const newRider = {
-        'ID': riderID,
+        ID: riderID,
         'Rider Name': riderName,
-        'School': school,
-        'Weight': weight,
-        'Height': height,
+        School: school,
+        Weight: weight,
+        Height: height,
       };
 
       const updatedData = { ...riderData };
 
       if (updatedData[selectedClass]) {
-        if (!updatedData[selectedClass].some((rider) => rider['ID'] === riderID)) {
+        if (!updatedData[selectedClass].some((rider) => rider.ID === riderID)) {
           updatedData[selectedClass].push(newRider);
         }
       } else {
@@ -68,32 +70,103 @@ const ManageRidersPage = ({ userRole, handleLogout }) => {
     }
   };
 
+  const handleEditRider = (row, classSelection) => {
+    setEditMode(true);
+    setEditRow(row);
+    setSelectedClass(classSelection);
+    setRiderID(row.ID);
+    setRiderName(row['Rider Name']);
+    setSchool(row.School);
+    setWeight(row.Weight);
+    setHeight(row.Height);
+  };
+
+  const handleUpdateRider = () => {
+    if (selectedClass && riderID && riderName && school && weight && height) {
+      const updatedData = { ...riderData };
+  
+      if (updatedData[selectedClass]) {
+        // Remove the old row
+        updatedData[selectedClass] = updatedData[selectedClass].filter((rider) => rider.ID !== editRow.ID);
+  
+        // Add the updated row
+        const updatedRider = {
+          ID: riderID,
+          'Rider Name': riderName,
+          School: school,
+          Weight: weight,
+          Height: height,
+        };
+  
+        updatedData[selectedClass].push(updatedRider);
+      }
+  
+      setRiderData(updatedData);
+  
+      // Reset edit mode
+      setEditMode(false);
+      setEditRow(null);
+      setSelectedClass('');
+      setRiderID('');
+      setRiderName('');
+      setSchool('');
+      setWeight('');
+      setHeight('');
+    }
+  };
+  
+  const handleDeleteRider = () => {
+    if (selectedClass && editRow) {
+      const updatedData = { ...riderData };
+  
+      if (updatedData[selectedClass]) {
+        // Filter out the rider to be deleted
+        updatedData[selectedClass] = updatedData[selectedClass].filter((rider) => rider.ID !== editRow.ID);
+      }
+  
+      setRiderData(updatedData);
+  
+      // Reset edit mode
+      setEditMode(false);
+      setEditRow(null);
+      setSelectedClass('');
+      setRiderID('');
+      setRiderName('');
+      setSchool('');
+      setWeight('');
+      setHeight('');
+    }
+  };
+  
+
   const handleDownloadTable = () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('RiderData');
-
+  
     worksheet.addRow(['Class', 'ID', 'Rider Name', 'School', 'Weight', 'Height']);
-
+  
     classes.forEach((className) => {
       if (riderData[className]) {
         riderData[className].forEach((rider) => {
-          worksheet.addRow([className, rider['ID'], rider['Rider Name'], rider['School'], rider['Weight'], rider['Height']]);
+          worksheet.addRow([className, rider.ID, rider['Rider Name'], rider.School, rider.Weight, rider.Height]);
         });
       }
     });
-
+  
     workbook.xlsx.writeBuffer().then((buffer) => {
       const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const url = window.URL.createObjectURL(blob);
-
+  
       const a = document.createElement('a');
       a.href = url;
       a.download = 'rider_data.xlsx';
       a.click();
-
+  
       window.URL.revokeObjectURL(url);
     });
   };
+  
+  
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -111,7 +184,14 @@ const ManageRidersPage = ({ userRole, handleLogout }) => {
 
         excelData.forEach((row) => {
           const { Class, ID, 'Rider Name': riderName, School, Weight, Height } = row;
-          const newRider = { 'ID': ID, 'Rider Name': riderName, 'School': School, 'Weight': Weight, 'Height': Height };
+
+          const newRider = {
+            ID: ID,
+            'Rider Name': riderName,
+            School: School,
+            Weight: Weight,
+            Height: Height, // Assuming Height contains the numeric value in cm
+          };
 
           if (riderData[Class]) {
             riderData[Class].push(newRider);
@@ -174,15 +254,21 @@ const ManageRidersPage = ({ userRole, handleLogout }) => {
         />
         <InputBox
           type="text"
-          placeholder="Enter Height"
+          placeholder="Enter Height in cm"
           value={height}
           onChange={(e) => setHeight(e.target.value)}
         />
-        <Button onClick={handleAddRider}>Add</Button>
+        {editMode ? (
+          <div>
+            <Button onClick={handleUpdateRider}>Update</Button>
+            <Button onClick={() => setEditMode(false)}>Cancel</Button>
+          </div>
+        ) : (
+          <Button onClick={handleAddRider}>Add</Button>
+        )}
         <DownloadButton
-          onClick={handleDownloadTable}
-          disabled={!allClassesHaveRecords}
-        >
+      onClick={handleDownloadTable}
+      >
           Download Table
         </DownloadButton>
         <label>
@@ -197,24 +283,32 @@ const ManageRidersPage = ({ userRole, handleLogout }) => {
               <ClassTable>
                 <thead>
                   <tr>
-                    <th colSpan="6">{className}</th>
+                    <th colSpan="8">{className}</th>
                   </tr>
                   <tr>
                     <th>ID</th>
                     <th>Rider Name</th>
                     <th>School</th>
                     <th>Weight</th>
-                    <th>Height</th>
+                    <th>Height (cm)</th>
+                    <th>Edit</th>
+                    <th>Delete</th>
                   </tr>
                 </thead>
                 <tbody>
                   {riderData[className].map((rider, riderIndex) => (
                     <tr key={riderIndex}>
-                      <td>{rider['ID']}</td>
+                      <td>{rider.ID}</td>
                       <td>{rider['Rider Name']}</td>
-                      <td>{rider['School']}</td>
-                      <td>{rider['Weight']}</td>
-                      <td>{rider['Height']}</td>
+                      <td>{rider.School}</td>
+                      <td>{rider.Weight}</td>
+                      <td>{rider.Height}</td>
+                      <td>
+                        <Button onClick={() => handleEditRider(rider, className)}>Edit</Button>
+                      </td>
+                      <td>
+                        <Button onClick={() => handleDeleteRider(rider)}>Delete</Button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
