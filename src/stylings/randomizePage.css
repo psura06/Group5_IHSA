@@ -11,9 +11,7 @@
   padding: 50px;
   overflow: hidden;
 }
-body {
-  overflow-y: hidden;
-}
+
 .transparentCard {
   background-color: rgba(128, 128, 128, 0.6);
   border-radius: 15px;
