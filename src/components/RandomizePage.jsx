@@ -137,25 +137,29 @@ const RandomizePage = ({ userRole, handleLogout }) => {
     // Create a new ExcelJS workbook
     const workbook = new ExcelJS.Workbook();
 
+    // Create a single worksheet for all classes
+    const worksheet = workbook.addWorksheet('Randomized Results');
+
+    // Define the table header
+    const header = [
+      'Class Name',
+      'Placing',
+      'Number',
+      'Rider Name',
+      'School',
+      'Draw Order',
+      'Horse Name',
+      'Horse Provider',
+    ];
+
+    // Add the header row to the worksheet
+    worksheet.addRow(header);
+
+    // Add data from all classes to the worksheet
     tableData.forEach((result) => {
-      const worksheet = workbook.addWorksheet(result.className); // Create a worksheet for each class
-
-      // Define the table header
-      const header = [
-        'Placing',
-        'Number',
-        'Rider Name',
-        'School',
-        'Draw Order',
-        'Horse Name',
-        'Horse Provider',
-      ];
-
-      // Add the header row to the worksheet
-      worksheet.addRow(header);
-
       result.data.forEach((data) => {
         worksheet.addRow([
+          result.className,
           data.Placing,
           data.Number,
           data['Rider Name'],
@@ -169,7 +173,7 @@ const RandomizePage = ({ userRole, handleLogout }) => {
 
     // Generate the Excel file
     const blob = await workbook.xlsx.writeBuffer();
-    saveAs(new Blob([blob]), 'output.xlsx');
+    saveAs(new Blob([blob]), 'Randomized Results.xlsx');
   };
 
   return (
@@ -201,37 +205,39 @@ const RandomizePage = ({ userRole, handleLogout }) => {
         </div>
         <div className="resultsContainer">
           {/* Display the tables here */}
-          {tableData.map((result, index) => (
-            <div key={index} className="resultsTable">
-              <h2>{result.className}</h2>
-              <Table celled>
-                <Table.Header>
-                  <Table.Row>
-                    <Table.HeaderCell>Placing</Table.HeaderCell>
-                    <Table.HeaderCell>Number</Table.HeaderCell>
-                    <Table.HeaderCell>Rider Name</Table.HeaderCell>
-                    <Table.HeaderCell>School</Table.HeaderCell>
-                    <Table.HeaderCell>Draw Order</Table.HeaderCell>
-                    <Table.HeaderCell>Horse Name</Table.HeaderCell>
-                    <Table.HeaderCell>Horse Provider</Table.HeaderCell>
-                  </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                  {result.data.map((data, dataIndex) => (
-                    <Table.Row key={dataIndex}>
-                      <Table.Cell>{data.Placing}</Table.Cell>
-                      <Table.Cell>{data.Number}</Table.Cell>
-                      <Table.Cell>{data['Rider Name']}</Table.Cell>
-                      <Table.Cell>{data.School}</Table.Cell>
-                      <Table.Cell>{data['Draw Order']}</Table.Cell>
-                      <Table.Cell>{data['Horse Name']}</Table.Cell>
-                      <Table.Cell>{data['Horse Provider']}</Table.Cell>
+          <div className="resultsTableContainer">
+            {tableData.map((result, index) => (
+              <div key={index} className="resultsTable">
+                <h2>{result.className}</h2>
+                <Table celled>
+                  <Table.Header>
+                    <Table.Row>
+                      <Table.HeaderCell>Placing</Table.HeaderCell>
+                      <Table.HeaderCell>Number</Table.HeaderCell>
+                      <Table.HeaderCell>Rider Name</Table.HeaderCell>
+                      <Table.HeaderCell>School</Table.HeaderCell>
+                      <Table.HeaderCell>Draw Order</Table.HeaderCell>
+                      <Table.HeaderCell>Horse Name</Table.HeaderCell>
+                      <Table.HeaderCell>Horse Provider</Table.HeaderCell>
                     </Table.Row>
-                  ))}
-                </Table.Body>
-              </Table>
-            </div>
-          ))}
+                  </Table.Header>
+                  <Table.Body>
+                    {result.data.map((data, dataIndex) => (
+                      <Table.Row key={dataIndex}>
+                        <Table.Cell>{data.Placing}</Table.Cell>
+                        <Table.Cell>{data.Number}</Table.Cell>
+                        <Table.Cell>{data['Rider Name']}</Table.Cell>
+                        <Table.Cell>{data.School}</Table.Cell>
+                        <Table.Cell>{data['Draw Order']}</Table.Cell>
+                        <Table.Cell>{data['Horse Name']}</Table.Cell>
+                        <Table.Cell>{data['Horse Provider']}</Table.Cell>
+                      </Table.Row>
+                    ))}
+                  </Table.Body>
+                </Table>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

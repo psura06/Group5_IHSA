@@ -9,8 +9,11 @@
   align-items: flex-start;
   justify-content: flex-start;
   padding: 50px;
+  overflow: hidden;
 }
-
+body {
+  overflow-y: hidden;
+}
 .transparentCard {
   background-color: rgba(128, 128, 128, 0.6);
   border-radius: 15px;
@@ -68,6 +71,9 @@
   overflow-x: hidden;
   overflow-y: auto;
   flex-grow: 1;
+  overflow-y: auto; /* Add a vertical scrollbar for the randomized table */
+  max-height: calc(100vh - 100px); /* Set the maximum height for the randomized table */
+
 }
 
 .resultsTableContainer {
@@ -75,12 +81,16 @@
   flex-direction: column;
   align-items: flex-start;
   overflow-y: auto; 
-  max-height: calc(126vh - 140px); 
+  max-height: calc(126vh - 80px); 
+  max-height: unset; 
+  
+  margin-bottom: 20px;
 }
 
 .resultsTable {
   width: auto;
   color: white;
+  
 }
 
 .resultsTable h2 {
