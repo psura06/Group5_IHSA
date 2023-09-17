@@ -56,14 +56,10 @@ const RandomizePage = ({ userRole, handleLogout }) => {
       const parsedRiders = JSON.parse(JSON.stringify(ridersFile));
       const parsedHorses = JSON.parse(JSON.stringify(horsesFile));
 
-      // Filter out riders with UnderWeight set to "T" and horses with OverWeight set to "T"
-      const filteredRiders = parsedRiders.filter((rider) => rider['UnderWeight'] !== 'T');
-      const filteredHorses = parsedHorses.filter((horse) => horse['OverWeight'] !== 'T');
-
       // Extract class names from filtered riders and horses data
-      const riderClassNames = [...new Set(filteredRiders.map((rider) => rider['Class']))]
+      const riderClassNames = [...new Set(parsedRiders.map((rider) => rider['Class']))]
         .filter(Boolean); // Filter out undefined or empty class names
-      const horseClassNames = [...new Set(filteredHorses.map((horse) => horse['Class']))]
+      const horseClassNames = [...new Set(parsedHorses.map((horse) => horse['Class']))]
         .filter(Boolean); // Filter out undefined or empty class names
 
       console.log('Rider Class Names:', riderClassNames);
@@ -76,53 +72,62 @@ const RandomizePage = ({ userRole, handleLogout }) => {
 
       let results = [];
       let showClassNumber = 1;
+
       for (let classKey of allClassNames) {
-        let ridersInClass = filteredRiders.filter((rider) => rider['Class'] === classKey) || [];
-        let horsesInClass = filteredHorses.filter((horse) => horse['Class'] === classKey) || [];
+        let ridersInClass = parsedRiders.filter((rider) => rider['Class'] === classKey) || [];
+        let horsesInClass = parsedHorses.filter((horse) => horse['Class'] === classKey) || [];
 
         console.log('Class Name:', classKey);
         console.log('Riders Count:', ridersInClass.length);
         console.log('Horses Count:', horsesInClass.length);
 
-        // Filter horses based on MaxWeight >= Weight of the rider
-        ridersInClass.sort(() => Math.random() - 0.5);
-        horsesInClass.sort((a, b) => a['MaxWeight'] - b['MaxWeight']); // Sort horses by MaxWeight
-
-        console.log('Filtered Riders Count:', ridersInClass.length);
-        console.log('Filtered Horses Count:', horsesInClass.length);
-
         let classResult = [];
         let uniqueHorsesUsed = new Set();
 
         for (let rider of ridersInClass) {
-          let horse = horsesInClass.find(
-            (h) => !uniqueHorsesUsed.has(h['Horse Name']) && h['MaxWeight'] >= rider['Weight']
-          );
-
-          if (!horse) {
-            // If no unique horse matches the condition, get the first available horse
-            horse = horsesInClass.find((h) => h['MaxWeight'] >= rider['Weight']);
-          }
-
-          if (horse) {
-            classResult.push({
-              Placing: classResult.length + 1,
-              Number: rider['ID'] || '', // Use the 'ID' field from your Excel file
-              'Rider Name': rider['Rider Name'] || '', // Use the 'Rider Name' field from your Excel file
-              School: rider['School'] || '', // Use the 'School' field from your Excel file
-              'Draw Order': classResult.length + 1, // Changed the draw order logic
-              'Horse Name': horse['Horse Name'] || '',
-            });
-
-            uniqueHorsesUsed.add(horse['Horse Name']);
+          // Check the conditions for horse assignment
+          if (rider['OverWeight'] === 'F') {
+            if (horsesInClass.some((horse) => horse['UnderWeight'] === 'F' || horse['UnderWeight'] === 'T')) {
+              let availableHorses = horsesInClass.filter(
+                (horse) => horse['UnderWeight'] === 'F' || horse['UnderWeight'] === 'T'
+              );
+              let horse = availableHorses.find((h) => !uniqueHorsesUsed.has(h['Horse Name']));
+              if (!horse) {
+                // If no unique horse matches the condition, get the first available horse
+                horse = availableHorses[0];
+              }
+              if (horse) {
+                classResult.push({
+                  Number: rider['ID'] || '', // Use the 'ID' field from your Excel file
+                  'Rider Name': rider['Rider Name'] || '', // Use the 'Rider Name' field from your Excel file
+                  School: rider['School'] || '', // Use the 'School' field from your Excel file
+                  'Draw Order': classResult.length + 1, // Changed the draw order logic
+                  'Horse Name': horse['Horse Name'] || '',
+                });
+                uniqueHorsesUsed.add(horse['Horse Name']);
+              }
+            }
+          } else if (rider['OverWeight'] === 'T') {
+            if (horsesInClass.some((horse) => horse['UnderWeight'] === 'F')) {
+              let horse = horsesInClass.find((h) => h['UnderWeight'] === 'F');
+              if (horse) {
+                classResult.push({
+                  Number: rider['ID'] || '', // Use the 'ID' field from your Excel file
+                  'Rider Name': rider['Rider Name'] || '', // Use the 'Rider Name' field from your Excel file
+                  School: rider['School'] || '', // Use the 'School' field from your Excel file
+                  'Draw Order': classResult.length + 1, // Changed the draw order logic
+                  'Horse Name': horse['Horse Name'] || '',
+                });
+                uniqueHorsesUsed.add(horse['Horse Name']);
+              }
+            }
           }
         }
 
         results.push({
-          className: `Show Class ${showClassNumber} "${classKey}"`, // Format the class name as specified
+          className: `Show Class ${showClassNumber} ${classKey}`,
           data: classResult,
         });
-
         showClassNumber++;
       }
 
@@ -130,7 +135,7 @@ const RandomizePage = ({ userRole, handleLogout }) => {
 
       setTableData(results);
     } catch (error) {
-      console.error('Error while processing data:', error);
+      console.error('Error randomizing:', error);
     }
   };
 
@@ -139,33 +144,25 @@ const RandomizePage = ({ userRole, handleLogout }) => {
       console.error('Table is empty, cannot download');
       return;
     }
-
+  
     // Create a new ExcelJS workbook
     const workbook = new ExcelJS.Workbook();
-
+  
     // Create a single worksheet for all classes
     const worksheet = workbook.addWorksheet('Randomized Results');
-
-    // Define the table header
-    const header = [
-      'Class Name',
-      'Placing',
-      'Number',
-      'Rider Name',
-      'School',
-      'Draw Order',
-      'Horse Name',
-    ];
-
-    // Add the header row to the worksheet
-    worksheet.addRow(header);
-
+  
     // Add data from all classes to the worksheet
-    tableData.forEach((result) => {
+    tableData.forEach((result, index) => {
+      // Add the class name as a merged cell
+      worksheet.addRow([result.className]);
+      worksheet.mergeCells(worksheet.lastRow.number, 1, worksheet.lastRow.number, 6);
+  
+      // Add header row for columns
+      worksheet.addRow(['Number', 'Rider Name', 'School', 'Draw Order', 'Horse Name']);
+  
+      // Add class data
       result.data.forEach((data) => {
         worksheet.addRow([
-          result.className,
-          data.Placing,
           data.Number,
           data['Rider Name'],
           data.School,
@@ -173,12 +170,19 @@ const RandomizePage = ({ userRole, handleLogout }) => {
           data['Horse Name'],
         ]);
       });
+  
+      // Add an empty row between classes except for the last class
+      if (index < tableData.length - 1) {
+        worksheet.addRow([]);
+      }
     });
-
+  
     // Generate the Excel file
     const blob = await workbook.xlsx.writeBuffer();
-    saveAs(new Blob([blob]), 'Randomized Results.xlsx');
+    saveAs(new Blob([blob]), 'Randomized_Results.xlsx');
   };
+  
+  
 
   return (
     <div>
@@ -216,7 +220,6 @@ const RandomizePage = ({ userRole, handleLogout }) => {
                 <Table celled>
                   <Table.Header>
                     <Table.Row>
-                      <Table.HeaderCell>Placing</Table.HeaderCell>
                       <Table.HeaderCell>Number</Table.HeaderCell>
                       <Table.HeaderCell>Rider Name</Table.HeaderCell>
                       <Table.HeaderCell>School</Table.HeaderCell>
@@ -227,7 +230,6 @@ const RandomizePage = ({ userRole, handleLogout }) => {
                   <Table.Body>
                     {result.data.map((data, dataIndex) => (
                       <Table.Row key={dataIndex}>
-                        <Table.Cell>{data.Placing}</Table.Cell>
                         <Table.Cell>{data.Number}</Table.Cell>
                         <Table.Cell>{data['Rider Name']}</Table.Cell>
                         <Table.Cell>{data.School}</Table.Cell>
