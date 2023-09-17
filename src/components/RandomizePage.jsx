@@ -56,10 +56,14 @@ const RandomizePage = ({ userRole, handleLogout }) => {
       const parsedRiders = JSON.parse(JSON.stringify(ridersFile));
       const parsedHorses = JSON.parse(JSON.stringify(horsesFile));
 
-      // Extract class names from riders and horses data
-      const riderClassNames = [...new Set(parsedRiders.map((rider) => rider['Class']))]
+      // Filter out riders with UnderWeight set to "T" and horses with OverWeight set to "T"
+      const filteredRiders = parsedRiders.filter((rider) => rider['UnderWeight'] !== 'T');
+      const filteredHorses = parsedHorses.filter((horse) => horse['OverWeight'] !== 'T');
+
+      // Extract class names from filtered riders and horses data
+      const riderClassNames = [...new Set(filteredRiders.map((rider) => rider['Class']))]
         .filter(Boolean); // Filter out undefined or empty class names
-      const horseClassNames = [...new Set(parsedHorses.map((horse) => horse['Class']))]
+      const horseClassNames = [...new Set(filteredHorses.map((horse) => horse['Class']))]
         .filter(Boolean); // Filter out undefined or empty class names
 
       console.log('Rider Class Names:', riderClassNames);
@@ -71,9 +75,10 @@ const RandomizePage = ({ userRole, handleLogout }) => {
       console.log('All Class Names:', allClassNames);
 
       let results = [];
+      let showClassNumber = 1;
       for (let classKey of allClassNames) {
-        let ridersInClass = parsedRiders.filter((rider) => rider['Class'] === classKey) || [];
-        let horsesInClass = parsedHorses.filter((horse) => horse['Class'] === classKey) || [];
+        let ridersInClass = filteredRiders.filter((rider) => rider['Class'] === classKey) || [];
+        let horsesInClass = filteredHorses.filter((horse) => horse['Class'] === classKey) || [];
 
         console.log('Class Name:', classKey);
         console.log('Riders Count:', ridersInClass.length);
@@ -107,7 +112,6 @@ const RandomizePage = ({ userRole, handleLogout }) => {
               School: rider['School'] || '', // Use the 'School' field from your Excel file
               'Draw Order': classResult.length + 1, // Changed the draw order logic
               'Horse Name': horse['Horse Name'] || '',
-              'Horse Provider': horse['Provider'] || '',
             });
 
             uniqueHorsesUsed.add(horse['Horse Name']);
@@ -115,9 +119,11 @@ const RandomizePage = ({ userRole, handleLogout }) => {
         }
 
         results.push({
-          className: classKey || '',
+          className: `Show Class ${showClassNumber} "${classKey}"`, // Format the class name as specified
           data: classResult,
         });
+
+        showClassNumber++;
       }
 
       console.log('Results:', results);
@@ -149,7 +155,6 @@ const RandomizePage = ({ userRole, handleLogout }) => {
       'School',
       'Draw Order',
       'Horse Name',
-      'Horse Provider',
     ];
 
     // Add the header row to the worksheet
@@ -166,7 +171,6 @@ const RandomizePage = ({ userRole, handleLogout }) => {
           data.School,
           data['Draw Order'],
           data['Horse Name'],
-          data['Horse Provider'],
         ]);
       });
     });
@@ -218,7 +222,6 @@ const RandomizePage = ({ userRole, handleLogout }) => {
                       <Table.HeaderCell>School</Table.HeaderCell>
                       <Table.HeaderCell>Draw Order</Table.HeaderCell>
                       <Table.HeaderCell>Horse Name</Table.HeaderCell>
-                      <Table.HeaderCell>Horse Provider</Table.HeaderCell>
                     </Table.Row>
                   </Table.Header>
                   <Table.Body>
@@ -230,7 +233,6 @@ const RandomizePage = ({ userRole, handleLogout }) => {
                         <Table.Cell>{data.School}</Table.Cell>
                         <Table.Cell>{data['Draw Order']}</Table.Cell>
                         <Table.Cell>{data['Horse Name']}</Table.Cell>
-                        <Table.Cell>{data['Horse Provider']}</Table.Cell>
                       </Table.Row>
                     ))}
                   </Table.Body>
