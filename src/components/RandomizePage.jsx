@@ -83,44 +83,73 @@ const RandomizePage = ({ userRole, handleLogout }) => {
 
         let classResult = [];
         let uniqueHorsesUsed = new Set();
+        let overweightTRiders = [];
+        let underweightTRiders = [];
 
         for (let rider of ridersInClass) {
-          // Check the conditions for horse assignment
-          if (rider['OverWeight'] === 'F') {
-            if (horsesInClass.some((horse) => horse['UnderWeight'] === 'F' || horse['UnderWeight'] === 'T')) {
-              let availableHorses = horsesInClass.filter(
-                (horse) => horse['UnderWeight'] === 'F' || horse['UnderWeight'] === 'T'
-              );
-              let horse = availableHorses.find((h) => !uniqueHorsesUsed.has(h['Horse Name']));
-              if (!horse) {
-                // If no unique horse matches the condition, get the first available horse
-                horse = availableHorses[0];
-              }
-              if (horse) {
-                classResult.push({
-                  Number: rider['ID'] || '', // Use the 'ID' field from your Excel file
-                  'Rider Name': rider['Rider Name'] || '', // Use the 'Rider Name' field from your Excel file
-                  School: rider['School'] || '', // Use the 'School' field from your Excel file
-                  'Draw Order': classResult.length + 1, // Changed the draw order logic
-                  'Horse Name': horse['Horse Name'] || '',
-                });
-                uniqueHorsesUsed.add(horse['Horse Name']);
-              }
-            }
-          } else if (rider['OverWeight'] === 'T') {
-            if (horsesInClass.some((horse) => horse['UnderWeight'] === 'F')) {
-              let horse = horsesInClass.find((h) => h['UnderWeight'] === 'F');
-              if (horse) {
-                classResult.push({
-                  Number: rider['ID'] || '', // Use the 'ID' field from your Excel file
-                  'Rider Name': rider['Rider Name'] || '', // Use the 'Rider Name' field from your Excel file
-                  School: rider['School'] || '', // Use the 'School' field from your Excel file
-                  'Draw Order': classResult.length + 1, // Changed the draw order logic
-                  'Horse Name': horse['Horse Name'] || '',
-                });
-                uniqueHorsesUsed.add(horse['Horse Name']);
-              }
-            }
+          // Check if the rider is overweight T or underweight T
+          if (rider['OverWeight'] === 'T') {
+            underweightTRiders.push(rider);
+          } else {
+            overweightTRiders.push(rider);
+          }
+        }
+
+        // Assign horses for underweight T riders
+        for (let rider of underweightTRiders) {
+          // Check if there are eligible "F" horses
+          let availableHorses = horsesInClass.filter(
+            (horse) => horse['UnderWeight'] === 'F'
+          );
+
+          // Filter out horses already assigned to overweight T riders
+          availableHorses = availableHorses.filter(
+            (horse) => !uniqueHorsesUsed.has(horse['Horse Name'])
+          );
+
+          if (availableHorses.length > 0) {
+            // Randomly select an "F" horse
+            const randomIndex = Math.floor(Math.random() * availableHorses.length);
+            const horse = availableHorses[randomIndex];
+
+            classResult.push({
+              Number: rider['ID'] || '',
+              'Rider Name': rider['Rider Name'] || '',
+              School: rider['School'] || '',
+              'Draw Order': classResult.length + 1,
+              'Horse Name': horse['Horse Name'] || '',
+            });
+
+            uniqueHorsesUsed.add(horse['Horse Name']);
+          }
+        }
+
+        // Assign horses for overweight T riders
+        for (let rider of overweightTRiders) {
+          // Check if there are eligible "F" or "T" horses
+          let availableHorses = horsesInClass.filter(
+            (horse) => horse['UnderWeight'] === 'F' || horse['UnderWeight'] === 'T'
+          );
+
+          // Filter out horses already assigned to other riders
+          availableHorses = availableHorses.filter(
+            (horse) => !uniqueHorsesUsed.has(horse['Horse Name'])
+          );
+
+          if (availableHorses.length > 0) {
+            // Randomly select a horse (either "F" or "T")
+            const randomIndex = Math.floor(Math.random() * availableHorses.length);
+            const horse = availableHorses[randomIndex];
+
+            classResult.push({
+              Number: rider['ID'] || '',
+              'Rider Name': rider['Rider Name'] || '',
+              School: rider['School'] || '',
+              'Draw Order': classResult.length + 1,
+              'Horse Name': horse['Horse Name'] || '',
+            });
+
+            uniqueHorsesUsed.add(horse['Horse Name']);
           }
         }
 
@@ -182,8 +211,6 @@ const RandomizePage = ({ userRole, handleLogout }) => {
     saveAs(new Blob([blob]), 'Randomized_Results.xlsx');
   };
   
-  
-
   return (
     <div>
       <NavBar userRole={userRole} handleLogout={handleLogout} />
