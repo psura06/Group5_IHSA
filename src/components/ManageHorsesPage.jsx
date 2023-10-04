@@ -1,325 +1,235 @@
 import React, { useState } from 'react';
-import NavBar from './NavBar';
-import styled from 'styled-components';
+import { Table, Input, Button, Select, Row, Col, Layout } from 'antd';
 import * as XLSX from 'xlsx';
-import ExcelJS from 'exceljs';
+import NavBar from './NavBar';
+import '../stylings/ManageHorsesPage.css';
+
+const { Option } = Select;
+const { Content } = Layout;
 
 const ManageHorsesPage = ({ userRole, handleLogout }) => {
-  const [selectedClass, setSelectedClass] = useState('');
-  const [horseName, setHorseName] = useState('');
-  const [provider, setProvider] = useState('');
-  const [maxWeight, setMaxWeight] = useState('');
-  const [description, setDescription] = useState('');
-  const [reign, setReign] = useState('');
-  const [spurs, setSpurs] = useState('');
-  const [horseData, setHorseData] = useState({});
+  const [showClassInput, setShowClassInput] = useState(''); // State to input Show Classes
+  const [classInput, setClassInput] = useState([]); // State to select Show Classes
+  const [horseNameInput, setHorseNameInput] = useState('');
+  const [underweightInput, setUnderweightInput] = useState('F');
+  const [tableData, setTableData] = useState([]);
+  // const [pasteData, setPasteData] = useState('');
+  const [showClasses, setShowClasses] = useState([]);
+  const [editingRow, setEditingRow] = useState(null); // State to track the row being edited
+  const [editedValues, setEditedValues] = useState({}); // State to store edited values
 
-  const classes = [
-    'Class 1 Introductory Hunter Seat Equitation',
-    'Class 2A Pre-Novice Hunter Seat Equitation',
-    'Class 2B Novice Hunter Seat Equitation',
-    'Class 3 Limit Hunter Seat Equitation on the Flat',
-    'Class 4 Limit Hunter Seat Equitation over Fences',
-    'Class 5 Intermediate Hunter Seat Equitation on the Flat',
-    'Class 6 Intermediate Hunter Seat Equitation over Fences',
-    'Class 7 Open Hunter Seat Equitation on the Flat',
-    'Class 8 Open Hunter Seat Equitation over Fences',
-    'Class 9 Alumni Hunter Seat Equitation on the Flat',
-    'Class 10 Alumni Hunter Seat Equitation over Fences',
-    'Class 11 Beginner Western Horsemanship',
-    'Class 12A Rookie A Western Horsemanship',
-    'Class 12B Rookie B Western Horsemanship',
-    'Class 13 Level I Western Horsemanship',
-    'Class 14 Level II Western Horsemanship',
-    'Class 15 Level II Ranch Riding',
-    'Class 16 Open Western Horsemanship',
-    'Class 17 Open Reining',
-    'Class 18 Alumni Western Horsemanship',
-    'Class 19 Alumni Ranch Riding'
+  const handleAddClass = () => {
+    if (showClassInput) {
+      const newShowClasses = showClassInput.split('\n').filter((line) => line.trim() !== '');
+      setShowClasses([...showClasses, ...newShowClasses]);
+      setShowClassInput('');
+    }
+  };
+
+  const handleAdd = () => {
+    if (classInput.length > 0 && horseNameInput && underweightInput) {
+      // Create a row for each selected Show Class
+      const newRows = classInput.map((selectedClass) => ({
+        Class: selectedClass,
+        HorseName: horseNameInput,
+        UnderWeight: underweightInput,
+      }));
+      setTableData([...tableData, ...newRows]);
+      setClassInput([]);
+      setHorseNameInput('');
+      setUnderweightInput('F');
+    }
+  };
+
+  const handleEdit = (record) => {
+    setEditingRow(record);
+    setEditedValues(record); // Set the edited values to the selected row's data
+  };
+
+  const handleSaveEdit = () => {
+    const updatedTableData = tableData.map((item) =>
+      item === editingRow
+        ? {
+            ...item,
+            Class: editedValues.Class,
+            HorseName: editedValues.HorseName,
+            UnderWeight: editedValues.UnderWeight,
+          }
+        : item
+    );
+    setTableData(updatedTableData);
+    setEditingRow(null); // Clear the editing state
+    setEditedValues({}); // Clear the edited values
+  };
+
+  const handleCancelEdit = () => {
+    setEditingRow(null); // Clear the editing state
+    setEditedValues({}); // Clear the edited values
+  };
+
+  const handleDownloadExcel = () => {
+    const modifiedData = tableData.map((item) => ({
+      Class: item.Class,
+      "Horse Name": item.HorseName,
+      UnderWeight: item.UnderWeight,
+    }));
+
+    const header = ["Class", "Horse Name", "UnderWeight"];
+    const worksheet = XLSX.utils.json_to_sheet(modifiedData, { header });
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, worksheet, 'HorsesData');
+    XLSX.writeFile(wb, 'horses_data.xlsx');
+  };
+
+  const columns = [
+    {
+      title: 'Class',
+      dataIndex: 'Class',
+      filters: showClasses
+        .filter((showClass) => tableData.some((item) => item.Class === showClass))
+        .map((showClass) => ({ text: showClass, value: showClass })),
+      onFilter: (value, record) => record.Class === value,
+      render: (_, record) =>
+        editingRow === record ? (
+          <Select
+            mode="multiple"
+            style={{ width: '100%' }}
+            value={editedValues.Class}
+            onChange={(value) => setEditedValues({ ...editedValues, Class: value })}
+          >
+            {showClasses.map((showClass) => (
+              <Option key={showClass} value={showClass}>
+                {showClass}
+              </Option>
+            ))}
+          </Select>
+        ) : (
+          record.Class
+        ),
+    },
+    {
+      title: 'Horse Name',
+      dataIndex: 'HorseName',
+      render: (_, record) =>
+        editingRow === record ? (
+          <Input
+            value={editedValues.HorseName}
+            onChange={(e) => setEditedValues({ ...editedValues, HorseName: e.target.value })}
+          />
+        ) : (
+          record.HorseName
+        ),
+    },
+    {
+      title: 'UnderWeight',
+      dataIndex: 'UnderWeight',
+      render: (_, record) =>
+        editingRow === record ? (
+          <Select
+            style={{ width: '100%' }}
+            value={editedValues.UnderWeight}
+            onChange={(value) => setEditedValues({ ...editedValues, UnderWeight: value })}
+          >
+            <Option value="T">T</Option>
+            <Option value="F">F</Option>
+          </Select>
+        ) : (
+          record.UnderWeight
+        ),
+    },
+    {
+      title: 'Action',
+      dataIndex: 'Action',
+      render: (_, record) => {
+        if (editingRow === record) {
+          return (
+            <>
+              <Button type="primary" onClick={handleSaveEdit}>
+                Save
+              </Button>
+              <Button type="default" onClick={handleCancelEdit}>
+                Cancel
+              </Button>
+            </>
+          );
+        } else {
+          return (
+            <Button type="link" onClick={() => handleEdit(record)}>
+              Edit
+            </Button>
+          );
+        }
+      },
+    },
   ];
 
-  // Define options for the Reign and Spurs dropdowns
-  const reignOptions = ['1 Hand', '2 Hands'];
-  const spursOptions = ['Ball', 'Optional', 'Optional Ball', 'Optional Rowel', 'Rowel', 'Rowel or Ball'];
-
-  const handleAddHorse = () => {
-    if (selectedClass && horseName && provider && maxWeight && description && reign && spurs) {
-      const newHorse = {
-        'Horse Name': horseName,
-        Provider: provider,
-        MaxWeight: maxWeight, // Use 'MaxWeight' without a space
-        Description: description,
-        Reign: reign,
-        Spurs: spurs,
-      };
-
-      const updatedData = { ...horseData };
-
-      if (updatedData[selectedClass]) {
-        if (!updatedData[selectedClass].some((horse) => horse['Horse Name'] === horseName && horse.Provider === provider)) {
-          updatedData[selectedClass].push(newHorse);
-        }
-      } else {
-        updatedData[selectedClass] = [newHorse];
-      }
-
-      setHorseData(updatedData);
-
-      setSelectedClass('');
-      setHorseName('');
-      setProvider('');
-      setMaxWeight('');
-      setDescription('');
-      setReign('');
-      setSpurs('');
-    }
-  };
-
-  const handleDownloadTable = () => {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('HorseData');
-
-    worksheet.addRow(['Class', 'Horse Name', 'Provider', 'MaxWeight', 'Description', 'Reign', 'Spurs']);
-
-    classes.forEach((className) => {
-      if (horseData[className]) {
-        horseData[className].forEach((horse) => {
-          worksheet.addRow([className, horse['Horse Name'], horse.Provider, horse.MaxWeight, horse.Description, horse.Reign, horse.Spurs]);
-        });
-      }
-    });
-
-    workbook.xlsx.writeBuffer().then((buffer) => {
-      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      const url = window.URL.createObjectURL(blob);
-
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'horse_data.xlsx';
-      a.click();
-
-      window.URL.revokeObjectURL(url);
-    });
-  };
-
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-
-    if (file) {
-      const reader = new FileReader();
-
-      reader.onload = (e) => {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-
-        const excelData = XLSX.utils.sheet_to_json(worksheet);
-
-        excelData.forEach((row) => {
-          const { Class, Provider, 'Horse Name': horseName, MaxWeight, Description, Reign, Spurs } = row;
-          const newHorse = { 'Horse Name': horseName, Provider, MaxWeight, Description, Reign, Spurs };
-
-          if (horseData[Class]) {
-            horseData[Class].push(newHorse);
-          } else {
-            horseData[Class] = [newHorse];
-          }
-        });
-
-        setHorseData({ ...horseData });
-      };
-
-      reader.readAsArrayBuffer(file);
-    }
-  };
-
-  const allClassesHaveRecords = classes.every((className) => !!horseData[className] && horseData[className].length > 0);
-
   return (
-    <Container>
+    <Layout className="manage-horses-layout">
       <NavBar userRole={userRole} handleLogout={handleLogout} />
-      <Heading>Add Horse</Heading>
-      <FormContainer>
-        <DropdownBox
-          value={selectedClass}
-          onChange={(e) => setSelectedClass(e.target.value)}
-          placeholder="Select a class"
-        >
-          <option value="" disabled>
-            Select a class
-          </option>
-          {classes.map((className, index) => (
-            <option key={index} value={className}>
-              {className}
-            </option>
-          ))}
-        </DropdownBox>
-        <InputBox
-          type="text"
-          placeholder="Enter Horse Name"
-          value={horseName}
-          onChange={(e) => setHorseName(e.target.value)}
-        />
-        <InputBox
-          type="text"
-          placeholder="Enter Provider"
-          value={provider}
-          onChange={(e) => setProvider(e.target.value)}
-        />
-        <InputBox
-          type="text"
-          placeholder="Enter Max Weight"
-          value={maxWeight}
-          onChange={(e) => setMaxWeight(e.target.value)}
-        />
-        <InputBox
-          type="text"
-          placeholder="Enter Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-        <DropdownBox
-          value={reign}
-          onChange={(e) => setReign(e.target.value)}
-          placeholder="Select Reign"
-        >
-          <option value="" disabled>
-            Select Reign
-          </option>
-          {reignOptions.map((option, index) => (
-            <option key={index} value={option}>
-              {option}
-            </option>
-          ))}
-        </DropdownBox>
-        <DropdownBox
-          value={spurs}
-          onChange={(e) => setSpurs(e.target.value)}
-          placeholder="Select Spurs"
-        >
-          <option value="" disabled>
-            Select Spurs
-          </option>
-          {spursOptions.map((option, index) => (
-            <option key={index} value={option}>
-              {option}
-            </option>
-          ))}
-        </DropdownBox>
-        <Button onClick={handleAddHorse}>Add</Button>
-        <DownloadButton
-          onClick={handleDownloadTable}
-          disabled={!allClassesHaveRecords}
-        >
-          Download Table
-        </DownloadButton>
-        <label>
-          Upload Excel File:
-          <input type="file" accept=".xlsx" onChange={handleFileUpload} />
-        </label>
-      </FormContainer>
-      {classes.map((className, index) => (
-        <React.Fragment key={index}>
-          {horseData[className] && (
-            <TableContainer>
-              <ClassTable>
-                <thead>
-                  <tr>
-                    <th colSpan="7">{className}</th>
-                  </tr>
-                  <tr>
-                    <th>Horse Name</th>
-                    <th>Provider</th>
-                    <th>Max Weight</th>
-                    <th>Description</th>
-                    <th>Reign</th>
-                    <th>Spurs</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {horseData[className].map((horse, horseIndex) => (
-                    <tr key={horseIndex}>
-                      <td>{horse['Horse Name']}</td>
-                      <td>{horse.Provider}</td>
-                      <td>{horse.MaxWeight}</td> {/* Use 'MaxWeight' without a space */}
-                      <td>{horse.Description}</td>
-                      <td>{horse.Reign}</td>
-                      <td>{horse.Spurs}</td>
-                    </tr>
+      <Content>
+        <div className="manage-horses-content">
+          <h1>Manage Horses</h1>
+          <Row gutter={16} className="input-row">
+            <Col span={4}>
+              <Input.TextArea
+                placeholder="Add Show Classes (one per line)"
+                autoSize={{ minRows: 3 }}
+                value={showClassInput}
+                onChange={(e) => setShowClassInput(e.target.value)}
+              />
+            </Col>
+            <Col span={2}>
+              <Button type="primary" onClick={handleAddClass}>
+                Add Class
+              </Button>
+            </Col>
+            <Col span={3}>
+              {showClasses.length > 0 && (
+                <Select
+                  mode="multiple" // This sets up multi-select
+                  style={{ width: '100%' }}
+                  placeholder="Select Show Class"
+                  value={classInput}
+                  onChange={(value) => setClassInput(value)}
+                >
+                  {showClasses.map((showClass) => (
+                    <Option key={showClass} value={showClass}>
+                      {showClass}
+                    </Option>
                   ))}
-                </tbody>
-              </ClassTable>
-            </TableContainer>
-          )}
-        </React.Fragment>
-      ))}
-    </Container>
+                </Select>
+              )}
+            </Col>
+            <Col span={3}>
+              <Input
+                placeholder="Horse Name"
+                value={horseNameInput}
+                onChange={(e) => setHorseNameInput(e.target.value)}
+              />
+            </Col>
+            <Col span={3}>
+              <Select style={{ width: '100%' }} value={underweightInput} onChange={(value) => setUnderweightInput(value)}>
+                <Option value="T">T</Option>
+                <Option value="F">F</Option>
+              </Select>
+            </Col>
+            <Col span={3}>
+              <Button type="primary" onClick={handleAdd}>
+                Add
+              </Button>
+            </Col>
+            <Col span={2} offset={2}>
+              <Button type="primary" onClick={handleDownloadExcel}>
+                Download Excel
+              </Button>
+            </Col>
+          </Row>
+         
+          <Table dataSource={tableData} columns={columns} rowKey={(record) => record.ID} />
+        </div>
+      </Content>
+    </Layout>
   );
 };
-
-const Container = styled.div`
-  padding: 20px;
-  text-align: center;
-`;
-
-const Heading = styled.h1`
-  font-size: 24px;
-  font-weight: bold;
-`;
-
-const FormContainer = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-  align-items: center;
-`;
-
-const DropdownBox = styled.select`
-  padding: 5px;
-  border-radius: 5px;
-`;
-
-const InputBox = styled.input`
-  padding: 5px;
-  border-radius: 5px;
-`;
-
-const Button = styled.button`
-  padding: 5px;
-  border-radius: 5px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  cursor: pointer;
-`;
-
-const DownloadButton = styled.button`
-  padding: 5px;
-  border-radius: 5px;
-  background-color: ${(props) => (props.disabled ? 'gray' : '#007bff')};
-  color: white;
-  border: none;
-  cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
-`;
-
-const TableContainer = styled.div`
-  margin-top: 20px;
-`;
-
-const ClassTable = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  th,
-  td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: center;
-  }
-  th {
-    background-color: #f2f2f2;
-  }
-`;
 
 export default ManageHorsesPage;

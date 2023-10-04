@@ -1,388 +1,315 @@
 import React, { useState } from 'react';
-import NavBar from './NavBar';
-import styled from 'styled-components';
+import { Table, Input, Button, Select, Row, Col, Layout } from 'antd';
 import * as XLSX from 'xlsx';
-import ExcelJS from 'exceljs';
+import NavBar from './NavBar';
+import '../stylings/ManageRidersPage.css';
+
+const { Option } = Select;
+const { Content } = Layout;
 
 const ManageRidersPage = ({ userRole, handleLogout }) => {
-  const [selectedClass, setSelectedClass] = useState('');
-  const [riderID, setRiderID] = useState('');
-  const [riderName, setRiderName] = useState('');
-  const [school, setSchool] = useState('');
-  const [weight, setWeight] = useState('');
-  const [height, setHeight] = useState('');
-  const [riderData, setRiderData] = useState({});
-  const [editMode, setEditMode] = useState(false);
-  const [editRow, setEditRow] = useState(null);
+  const [showClassInput, setShowClassInput] = useState(''); // State to input Show Classes
+  const [classInput, setClassInput] = useState(''); // State to select Show Classes
+  const [riderNameInput, setRiderNameInput] = useState('');
+  const [schoolInput, setSchoolInput] = useState('');
+  const [overweightInput, setOverweightInput] = useState('F');
+  const [tableData, setTableData] = useState([]);
+  const [pasteData, setPasteData] = useState('');
+  const [idInput, setIdInput] = useState('');
+  const [showClasses, setShowClasses] = useState([]);
+  const [editingRow, setEditingRow] = useState(null); // State to track the row being edited
+  const [editedValues, setEditedValues] = useState({}); // State to store edited values
 
-  const classes = [
-    'Class 1 Introductory Hunter Seat Equitation',
-    'Class 2A Pre-Novice Hunter Seat Equitation',
-    'Class 2B Novice Hunter Seat Equitation',
-    'Class 3 Limit Hunter Seat Equitation on the Flat',
-    'Class 4 Limit Hunter Seat Equitation over Fences',
-    'Class 5 Intermediate Hunter Seat Equitation on the Flat',
-    'Class 6 Intermediate Hunter Seat Equitation over Fences',
-    'Class 7 Open Hunter Seat Equitation on the Flat',
-    'Class 8 Open Hunter Seat Equitation over Fences',
-    'Class 9 Alumni Hunter Seat Equitation on the Flat',
-    'Class 10 Alumni Hunter Seat Equitation over Fences',
-    'Class 11 Beginner Western Horsemanship',
-    'Class 12A Rookie A Western Horsemanship',
-    'Class 12B Rookie B Western Horsemanship',
-    'Class 13 Level I Western Horsemanship',
-    'Class 14 Level II Western Horsemanship',
-    'Class 15 Level II Ranch Riding',
-    'Class 16 Open Western Horsemanship',
-    'Class 17 Open Reining',
-    'Class 18 Alumni Western Horsemanship',
-    'Class 19 Alumni Ranch Riding'
+  const handleAddClass = () => {
+    if (showClassInput) {
+      // Split showClassInput into an array of lines
+      const newShowClasses = showClassInput.split('\n').filter((line) => line.trim() !== '');
+      setShowClasses([...showClasses, ...newShowClasses]);
+      setShowClassInput('');
+    }
+  };
+
+  const handleAdd = () => {
+    if (classInput && riderNameInput && schoolInput) {
+      setTableData([
+        ...tableData,
+        {
+          Class: classInput,
+          ID: idInput,
+          RiderName: riderNameInput,
+          School: schoolInput,
+          OverWeight: overweightInput,
+        },
+      ]);
+      setClassInput('');
+      setIdInput('');
+      setRiderNameInput('');
+      setSchoolInput('');
+      setOverweightInput('F');
+    }
+  };
+
+  const handleEdit = (record) => {
+    setEditingRow(record);
+    setEditedValues(record); // Set the edited values to the selected row's data
+  };
+
+  const handleSaveEdit = () => {
+    const updatedTableData = tableData.map((item) =>
+      item === editingRow
+        ? {
+            ...item,
+            Class: editedValues.Class,
+            ID: editedValues.ID,
+            RiderName: editedValues.RiderName,
+            School: editedValues.School,
+          }
+        : item
+    );
+    setTableData(updatedTableData);
+    setEditingRow(null); // Clear the editing state
+    setEditedValues({}); // Clear the edited values
+  };
+
+  const handleCancelEdit = () => {
+    setEditingRow(null); // Clear the editing state
+    setEditedValues({}); // Clear the edited values
+  };
+
+  const handleDownloadExcel = () => {
+    const modifiedData = tableData.map((item) => ({
+      Class: item.Class,
+      ID: item.ID,
+      "Rider Name": item.RiderName,
+      School: item.School,
+      OverWeight: item.OverWeight,
+    }));
+
+    const header = ["Class", "ID", "Rider Name", "School", "OverWeight"];
+    const worksheet = XLSX.utils.json_to_sheet(modifiedData, { header });
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, worksheet, 'RidersData');
+    XLSX.writeFile(wb, 'riders_data.xlsx');
+  };
+
+  const handleExtract = () => {
+    const dataLines = pasteData.split('\n').filter((line) => line.trim() !== '');
+    const extractedData = [];
+    let currentClass = classInput; // Initialize with the selected Show Class
+
+    for (const line of dataLines) {
+      if (line.startsWith('Show Class')) {
+        currentClass = line;
+        if (!showClasses.includes(currentClass)) {
+          setShowClasses([...showClasses, currentClass]);
+        }
+      } else if (!line.startsWith('1. _________') && showClasses.includes(currentClass)) {
+        if (!line.includes('Kansas State University Sunday Show') && !line.includes('Classes / Sections')) {
+          const words = line.split(' ');
+          const id = words.shift(); // Get the first part as ID
+          const riderName = words.slice(0, 2).join(' '); // Get the first two words after the three digits as Rider Name
+          const school = words.slice(2).join(' '); // The rest as School
+
+          extractedData.push({
+            Class: currentClass,
+            ID: id,
+            RiderName: riderName,
+            School: school,
+            OverWeight: 'F',
+          });
+        }
+      }
+    }
+
+    setTableData(extractedData);
+  };
+
+  const columns = [
+    {
+      title: 'Class',
+      dataIndex: 'Class',
+      filters: showClasses
+      .filter((showClass) => tableData.some((item) => item.Class === showClass))
+      .map((showClass) => ({ text: showClass, value: showClass })),
+    onFilter: (value, record) => record.Class === value,
+      render: (_, record) =>
+        editingRow === record ? (
+          <Select
+            style={{ width: '100%' }}
+            value={editedValues.Class}
+            onChange={(value) => setEditedValues({ ...editedValues, Class: value })}
+          >
+            {showClasses.map((showClass) => (
+              <Option key={showClass} value={showClass}>
+                {showClass}
+              </Option>
+            ))}
+          </Select>
+        ) : (
+          record.Class
+        ),
+    },
+    {
+      title: 'ID',
+      dataIndex: 'ID',
+      render: (_, record) =>
+        editingRow === record ? (
+          <Input value={editedValues.ID} onChange={(e) => setEditedValues({ ...editedValues, ID: e.target.value })} />
+        ) : (
+          record.ID
+        ),
+    },
+    {
+      title: 'Rider Name',
+      dataIndex: 'RiderName',
+      render: (_, record) =>
+        editingRow === record ? (
+          <Input
+            value={editedValues.RiderName}
+            onChange={(e) => setEditedValues({ ...editedValues, RiderName: e.target.value })}
+          />
+        ) : (
+          record.RiderName
+        ),
+    },
+    {
+      title: 'School',
+      dataIndex: 'School',
+      render: (_, record) =>
+        editingRow === record ? (
+          <Input
+            value={editedValues.School}
+            onChange={(e) => setEditedValues({ ...editedValues, School: e.target.value })}
+          />
+        ) : (
+          record.School
+        ),
+    },
+    {
+      title: 'OverWeight',
+      dataIndex: 'OverWeight',
+      render: (_, record) =>
+        editingRow === record ? (
+          <Select
+            style={{ width: '100%' }}
+            value={editedValues.OverWeight}
+            onChange={(value) => setEditedValues({ ...editedValues, OverWeight: value })}
+          >
+            <Option value="T">T</Option>
+            <Option value="F">F</Option>
+          </Select>
+        ) : (
+          record.OverWeight
+        ),
+    },
+    {
+      title: 'Action',
+      dataIndex: 'Action',
+      render: (_, record) => {
+        if (editingRow === record) {
+          return (
+            <>
+              <Button type="primary" onClick={handleSaveEdit}>
+                Save
+              </Button>
+              <Button type="default" onClick={handleCancelEdit}>
+                Cancel
+              </Button>
+            </>
+          );
+        } else {
+          return (
+            <Button type="link" onClick={() => handleEdit(record)}>
+              Edit
+            </Button>
+          );
+        }
+      },
+    },
   ];
 
-  const handleAddRider = () => {
-    if (selectedClass && riderID && riderName && school && weight && height) {
-      const newRider = {
-        ID: riderID,
-        'Rider Name': riderName,
-        School: school,
-        Weight: weight,
-        Height: height,
-      };
-
-      const updatedData = { ...riderData };
-
-      if (updatedData[selectedClass]) {
-        if (!updatedData[selectedClass].some((rider) => rider.ID === riderID)) {
-          updatedData[selectedClass].push(newRider);
-        }
-      } else {
-        updatedData[selectedClass] = [newRider];
-      }
-
-      setRiderData(updatedData);
-
-      setSelectedClass('');
-      setRiderID('');
-      setRiderName('');
-      setSchool('');
-      setWeight('');
-      setHeight('');
-    }
-  };
-
-  const handleEditRider = (row, classSelection) => {
-    setEditMode(true);
-    setEditRow(row);
-    setSelectedClass(classSelection);
-    setRiderID(row.ID);
-    setRiderName(row['Rider Name']);
-    setSchool(row.School);
-    setWeight(row.Weight);
-    setHeight(row.Height);
-  };
-
-  const handleUpdateRider = () => {
-    if (selectedClass && riderID && riderName && school && weight && height) {
-      const updatedData = { ...riderData };
-  
-      if (updatedData[selectedClass]) {
-        // Remove the old row
-        updatedData[selectedClass] = updatedData[selectedClass].filter((rider) => rider.ID !== editRow.ID);
-  
-        // Add the updated row
-        const updatedRider = {
-          ID: riderID,
-          'Rider Name': riderName,
-          School: school,
-          Weight: weight,
-          Height: height,
-        };
-  
-        updatedData[selectedClass].push(updatedRider);
-      }
-  
-      setRiderData(updatedData);
-  
-      // Reset edit mode
-      setEditMode(false);
-      setEditRow(null);
-      setSelectedClass('');
-      setRiderID('');
-      setRiderName('');
-      setSchool('');
-      setWeight('');
-      setHeight('');
-    }
-  };
-  
-  const handleDeleteRider = () => {
-    if (selectedClass && editRow) {
-      const updatedData = { ...riderData };
-  
-      if (updatedData[selectedClass]) {
-        // Filter out the rider to be deleted
-        updatedData[selectedClass] = updatedData[selectedClass].filter((rider) => rider.ID !== editRow.ID);
-      }
-  
-      setRiderData(updatedData);
-  
-      // Reset edit mode
-      setEditMode(false);
-      setEditRow(null);
-      setSelectedClass('');
-      setRiderID('');
-      setRiderName('');
-      setSchool('');
-      setWeight('');
-      setHeight('');
-    }
-  };
-  
-
-  const handleDownloadTable = () => {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('RiderData');
-  
-    worksheet.addRow(['Class', 'ID', 'Rider Name', 'School', 'Weight', 'Height']);
-  
-    classes.forEach((className) => {
-      if (riderData[className]) {
-        riderData[className].forEach((rider) => {
-          worksheet.addRow([className, rider.ID, rider['Rider Name'], rider.School, rider.Weight, rider.Height]);
-        });
-      }
-    });
-  
-    workbook.xlsx.writeBuffer().then((buffer) => {
-      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      const url = window.URL.createObjectURL(blob);
-  
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'rider_data.xlsx';
-      a.click();
-  
-      window.URL.revokeObjectURL(url);
-    });
-  };
-  
-  
-
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-
-    if (file) {
-      const reader = new FileReader();
-
-      reader.onload = (e) => {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-
-        const excelData = XLSX.utils.sheet_to_json(worksheet);
-
-        excelData.forEach((row) => {
-          const { Class, ID, 'Rider Name': riderName, School, Weight, Height } = row;
-
-          const newRider = {
-            ID: ID,
-            'Rider Name': riderName,
-            School: School,
-            Weight: Weight,
-            Height: Height, // Assuming Height contains the numeric value in cm
-          };
-
-          if (riderData[Class]) {
-            riderData[Class].push(newRider);
-          } else {
-            riderData[Class] = [newRider];
-          }
-        });
-
-        setRiderData({ ...riderData });
-      };
-
-      reader.readAsArrayBuffer(file);
-    }
-  };
-
-  const allClassesHaveRecords = classes.every((className) => !!riderData[className] && riderData[className].length > 0);
-
   return (
-    <Container>
+    <Layout className="manage-riders-layout">
       <NavBar userRole={userRole} handleLogout={handleLogout} />
-      <Heading>Add Rider</Heading>
-      <FormContainer>
-        <DropdownBox
-          value={selectedClass}
-          onChange={(e) => setSelectedClass(e.target.value)}
-          placeholder="Select a class"
-        >
-          <option value="" disabled>
-            Select a class
-          </option>
-          {classes.map((className, index) => (
-            <option key={index} value={className}>
-              {className}
-            </option>
-          ))}
-        </DropdownBox>
-        <InputBox
-          type="text"
-          placeholder="Enter Rider ID"
-          value={riderID}
-          onChange={(e) => setRiderID(e.target.value)}
-        />
-        <InputBox
-          type="text"
-          placeholder="Enter Rider Name"
-          value={riderName}
-          onChange={(e) => setRiderName(e.target.value)}
-        />
-        <InputBox
-          type="text"
-          placeholder="Enter School"
-          value={school}
-          onChange={(e) => setSchool(e.target.value)}
-        />
-        <InputBox
-          type="text"
-          placeholder="Enter Weight"
-          value={weight}
-          onChange={(e) => setWeight(e.target.value)}
-        />
-        <InputBox
-          type="text"
-          placeholder="Enter Height in cm"
-          value={height}
-          onChange={(e) => setHeight(e.target.value)}
-        />
-        {editMode ? (
-          <div>
-            <Button onClick={handleUpdateRider}>Update</Button>
-            <Button onClick={() => setEditMode(false)}>Cancel</Button>
-          </div>
-        ) : (
-          <Button onClick={handleAddRider}>Add</Button>
-        )}
-        <DownloadButton
-      onClick={handleDownloadTable}
-      >
-          Download Table
-        </DownloadButton>
-        <label>
-          Upload Excel File:
-          <input type="file" accept=".xlsx" onChange={handleFileUpload} />
-        </label>
-      </FormContainer>
-      {classes.map((className, index) => (
-        <React.Fragment key={index}>
-          {riderData[className] && (
-            <TableContainer>
-              <ClassTable>
-                <thead>
-                  <tr>
-                    <th colSpan="8">{className}</th>
-                  </tr>
-                  <tr>
-                    <th>ID</th>
-                    <th>Rider Name</th>
-                    <th>School</th>
-                    <th>Weight</th>
-                    <th>Height (cm)</th>
-                    <th>Edit</th>
-                    <th>Delete</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {riderData[className].map((rider, riderIndex) => (
-                    <tr key={riderIndex}>
-                      <td>{rider.ID}</td>
-                      <td>{rider['Rider Name']}</td>
-                      <td>{rider.School}</td>
-                      <td>{rider.Weight}</td>
-                      <td>{rider.Height}</td>
-                      <td>
-                        <Button onClick={() => handleEditRider(rider, className)}>Edit</Button>
-                      </td>
-                      <td>
-                        <Button onClick={() => handleDeleteRider(rider)}>Delete</Button>
-                      </td>
-                    </tr>
+      <Content>
+        <div className="manage-riders-content">
+          <h1>Manage Riders</h1>
+          <Row gutter={16} className="input-row">
+            <Col span={4}>
+              <Input.TextArea
+                placeholder="Add Show Classes (one per line)"
+                autoSize={{ minRows: 3 }}
+                value={showClassInput}
+                onChange={(e) => setShowClassInput(e.target.value)}
+              />
+            </Col>
+            <Col span={2}>
+              <Button type="primary" onClick={handleAddClass}>
+                Add Class
+              </Button>
+            </Col>
+            <Col span={3}>
+              {showClasses.length > 0 && (
+                <Select
+                  style={{ width: '100%' }}
+                  placeholder="Select Show Class"
+                  value={classInput}
+                  onChange={(value) => setClassInput(value)}
+                >
+                  {showClasses.map((showClass) => (
+                    <Option key={showClass} value={showClass}>
+                      {showClass}
+                    </Option>
                   ))}
-                </tbody>
-              </ClassTable>
-            </TableContainer>
-          )}
-        </React.Fragment>
-      ))}
-    </Container>
+                </Select>
+              )}
+            </Col>
+            <Col span={3}>
+              <Input placeholder="ID" value={idInput} onChange={(e) => setIdInput(e.target.value)} />
+            </Col>
+            <Col span={3}>
+              <Input
+                placeholder="Rider Name"
+                value={riderNameInput}
+                onChange={(e) => setRiderNameInput(e.target.value)}
+              />
+            </Col>
+            <Col span={3}>
+              <Input placeholder="School" value={schoolInput} onChange={(e) => setSchoolInput(e.target.value)} />
+            </Col>
+            <Col span={2}>
+              <Select style={{ width: '100%' }} value={overweightInput} onChange={(value) => setOverweightInput(value)}>
+                <Option value="T">T</Option>
+                <Option value="F">F</Option>
+              </Select>
+            </Col>
+            <Col span={2}>
+              <Button type="primary" onClick={handleAdd}>
+                Add
+              </Button>
+            </Col>
+          </Row>
+          <Row gutter={16} className="input-row">
+            <Col span={24}>
+              <Input.TextArea
+                placeholder="Paste data here to Extract"
+                autoSize={{ minRows: 3 }}
+                value={pasteData}
+                onChange={(e) => setPasteData(e.target.value)}
+              />
+              <Button className="extract-button" type="primary" onClick={handleExtract}>
+                Extract
+              </Button>
+              <Button type="primary" onClick={handleDownloadExcel} style={{ marginLeft: '80px' }} >
+                Download Excel
+              </Button>
+            </Col>
+          </Row>
+          <Table dataSource={tableData} columns={columns} rowKey={(record) => record.ID} />
+        </div>
+      </Content>
+    </Layout>
   );
 };
-
-const Container = styled.div`
-  padding: 20px;
-  text-align: center;
-`;
-
-const Heading = styled.h1`
-  font-size: 24px;
-  font-weight: bold;
-`;
-
-const FormContainer = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-  align-items: center;
-`;
-
-const DropdownBox = styled.select`
-  padding: 5px;
-  border-radius: 5px;
-`;
-
-const InputBox = styled.input`
-  padding: 5px;
-  border-radius: 5px;
-`;
-
-const Button = styled.button`
-  padding: 5px;
-  border-radius: 5px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  cursor: pointer;
-`;
-
-const DownloadButton = styled.button`
-  padding: 5px;
-  border-radius: 5px;
-  background-color: ${(props) => (props.disabled ? 'gray' : '#007bff')};
-  color: white;
-  border: none;
-  cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
-`;
-
-const TableContainer = styled.div`
-  margin-top: 20px;
-`;
-
-const ClassTable = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  th,
-  td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: center;
-  }
-  th {
-    background-color: #f2f2f2;
-  }
-`;
 
 export default ManageRidersPage;

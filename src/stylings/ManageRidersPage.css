@@ -1,0 +1,44 @@
+.manage-riders-layout {
+    min-height: 100vh;
+    display: flex;
+  }
+  
+  .manage-riders-content {
+    flex: 1;
+    padding: 24px;
+    background: #fff;
+  }
+  
+  .input-row {
+    margin-bottom: 16px;
+    border-radius: 20px;
+  }
+  
+  .paste-data-input {
+    width: 100%;
+    border-radius: 8px;
+    overflow: auto;
+    resize: inline-block;
+  }
+  
+  .extract-button {
+    margin-top: 16px;
+  }
+
+  /* Add some margin to the Add Class button */
+.manage-riders-layout .input-row > :first-child {
+    margin-bottom: 8px;
+  }
+  
+  /* Increase the width of the input field for adding Show Classes */
+  .manage-riders-layout .input-row > :first-child input {
+    width: 100%;
+  }
+  
+  /* Add some gap between Add and Download buttons */
+  .manage-riders-layout .input-row > :nth-child(8) {
+    margin-left: 16px;
+  }
+  
+
+  
