@@ -11,6 +11,7 @@
   justify-content: center;
   align-items: center;
   margin-top: 1rem;
+  position: relative; /* Added to position the clear button */
 }
 
 .search-bar input {
@@ -27,7 +28,11 @@
   border: none;
   outline: none;
   cursor: pointer;
-  margin-left: 0.5rem;
+  margin-left: 10px;
+  position: absolute; /* Added to position the clear button */
+  right: 10px; /* Adjust as needed */
+  top: 50%; /* Center vertically */
+  transform: translateY(-50%); /* Center vertically */
 }
 
 .clear-button i {
@@ -35,7 +40,7 @@
 }
 
 .gap {
-  height: 1rem;
+  height: 1rem; 
 }
 
 .gallery-grid {
@@ -98,7 +103,6 @@
 .gallery-card:hover .event-name {
   font-size: 1.2rem; /* Adjust the desired font size */
   filter: blur(0px); /* Adjust the blur values as desired */
-
 }
 
 .event-modal {

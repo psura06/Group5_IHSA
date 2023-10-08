@@ -193,11 +193,11 @@ body {
   margin-right: 20px;
   margin-bottom: 20px;
   margin-top: 20px;
-  width: 250px;
+  width: 220px;
 }
 .card.visible {
   display: block;
-  width: 300px;
+  width: 240px;
   padding: 2rem;
 }
 
@@ -210,7 +210,6 @@ body {
   border-bottom: 2px solid #777;
   padding: 3px 0;
   margin-bottom: 20px; /* Adjust the margin as needed */
-  
   margin-left: 10px;
   margin-right: 10px;
 }
@@ -218,7 +217,7 @@ body {
 /* Style for each tab */
 .tab {
   flex: 1;
-  padding: 10px;
+  padding: 7px;
   text-align: center;
   color: #fff;
   font-size: 18px;

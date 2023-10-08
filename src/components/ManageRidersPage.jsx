@@ -16,9 +16,18 @@ const ManageRidersPage = ({ userRole, handleLogout }) => {
   const [tableData, setTableData] = useState([]);
   const [pasteData, setPasteData] = useState('');
   const [idInput, setIdInput] = useState('');
-  const [showClasses, setShowClasses] = useState([]);
   const [editingRow, setEditingRow] = useState(null); // State to track the row being edited
   const [editedValues, setEditedValues] = useState({}); // State to store edited values
+  const [showClasses, setShowClasses] = useState([]);
+
+  // Function to extract unique Show Classes from tableData
+  const getUniqueShowClasses = () => {
+    const uniqueClasses = new Set();
+    tableData.forEach((record) => {
+      uniqueClasses.add(record.Class);
+    });
+    return Array.from(uniqueClasses);
+  };
 
   const handleAddClass = () => {
     if (showClassInput) {
@@ -95,7 +104,7 @@ const ManageRidersPage = ({ userRole, handleLogout }) => {
   const handleExtract = () => {
     const dataLines = pasteData.split('\n').filter((line) => line.trim() !== '');
     const extractedData = [];
-    let currentClass = classInput; // Initialize with the selected Show Class
+    let currentClass = '';
 
     for (const line of dataLines) {
       if (line.startsWith('Show Class')) {
@@ -103,7 +112,7 @@ const ManageRidersPage = ({ userRole, handleLogout }) => {
         if (!showClasses.includes(currentClass)) {
           setShowClasses([...showClasses, currentClass]);
         }
-      } else if (!line.startsWith('1. _________') && showClasses.includes(currentClass)) {
+      } else if (!line.startsWith('1. _________')) {
         if (!line.includes('Kansas State University Sunday Show') && !line.includes('Classes / Sections')) {
           const words = line.split(' ');
           const id = words.shift(); // Get the first part as ID
@@ -128,10 +137,8 @@ const ManageRidersPage = ({ userRole, handleLogout }) => {
     {
       title: 'Class',
       dataIndex: 'Class',
-      filters: showClasses
-      .filter((showClass) => tableData.some((item) => item.Class === showClass))
-      .map((showClass) => ({ text: showClass, value: showClass })),
-    onFilter: (value, record) => record.Class === value,
+      filters: getUniqueShowClasses().map((showClass) => ({ text: showClass, value: showClass })),
+      onFilter: (value, record) => record.Class === value,
       render: (_, record) =>
         editingRow === record ? (
           <Select
@@ -300,7 +307,7 @@ const ManageRidersPage = ({ userRole, handleLogout }) => {
               <Button className="extract-button" type="primary" onClick={handleExtract}>
                 Extract
               </Button>
-              <Button type="primary" onClick={handleDownloadExcel} style={{ marginLeft: '80px' }} >
+              <Button type="primary" onClick={handleDownloadExcel} style={{ marginLeft: '80px' }}>
                 Download Excel
               </Button>
             </Col>

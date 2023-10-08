@@ -447,9 +447,10 @@ app.post('/api/events', async (req, res) => {
     end_date,
     end_time,
     time_zone,
+    gallery,
   } = req.body;
 
-  const insertQuery = 'INSERT INTO events (image, name, venue, region, zone, discipline, description, start_date, start_time, end_date, end_time, time_zone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+  const insertQuery = 'INSERT INTO events (image, name, venue, region, zone, discipline, description, start_date, start_time, end_date, end_time, time_zone, gallery) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
 
   connection.query(
     insertQuery,
@@ -466,6 +467,7 @@ app.post('/api/events', async (req, res) => {
       end_date,
       end_time,
       time_zone,
+      gallery,
     ],
     (err, results) => {
       if (err) {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import NavBar from './NavBar';
 import axios from 'axios';
 import { Table, Input, Button, Select } from 'antd';
@@ -14,20 +14,20 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
   const [newPassword, setNewPassword] = useState('');
   const [newRole, setNewRole] = useState('');
 
-  const fetchAdmins = async () => {
+  const fetchAdmins = useCallback(async () => {
     const res = await axios.get('/api/admins');
     const dataWithIds = res.data
       .filter((admin) => admin.username !== loggedInUser)
-      .map((admin, index) => ({ ...admin, role: 'admin', id: index + 1 })); // added role: 'admin'
+      .map((admin, index) => ({ ...admin, role: 'admin', id: index + 1 }));
     setAdmins(dataWithIds);
-  };
+  }, [loggedInUser]);
 
-  const fetchShowAdmins = async () => {
+  const fetchShowAdmins = useCallback(async () => {
     const res = await axios.get('/api/showadmins');
     const dataWithIds = res.data
-      .map((admin, index) => ({ ...admin, role: 'showadmin', id: index + 1 })); // added role: 'showadmin'
+      .map((admin, index) => ({ ...admin, role: 'showadmin', id: index + 1 }));
     setShowAdmins(dataWithIds);
-  };
+  }, []);
 
   const handleUserCreation = () => {
     if (!newUsername || !newPassword || !newRole) return;
@@ -83,7 +83,7 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
   useEffect(() => {
     fetchAdmins();
     fetchShowAdmins();
-  }, [loggedInUser]);
+  }, [fetchAdmins, fetchShowAdmins, loggedInUser]);
 
   return (
     <div className="user-management-page">

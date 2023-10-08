@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Table, Button, Modal, Form, Input, Select, Space, Popconfirm } from 'antd';
 import axios from 'axios';
 import NavBar from './NavBar';
@@ -14,18 +14,19 @@ const ManageEventsPage = ({ userRole, handleLogout }) => {
   const [form] = Form.useForm();
   const [editingEvent, setEditingEvent] = useState(null);
 
-  useEffect(() => {
-    fetchEvents();
-  }, []);
-
-  const fetchEvents = async () => {
+  const fetchEvents = useCallback(async () => { // Wrap fetchEvents with useCallback
     try {
       const response = await axios.get('/api/events');
-      setEvents(response.data.map(formatEventDates)); // Format dates when fetching
+      setEvents(response.data.map(formatEventDates));
     } catch (error) {
       console.error('Error fetching events:', error);
     }
-  };
+  }, []); // Empty dependency array because fetchEvents doesn't depend on any props or state
+
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
+  
 
   const formatEventDates = (event) => {
     // Format start_date and end_date
@@ -93,6 +94,11 @@ const ManageEventsPage = ({ userRole, handleLogout }) => {
       title: 'Time Zone',
       dataIndex: 'time_zone',
       key: 'time_zone',
+    },
+    {
+      title: 'Gallery',
+      dataIndex: 'gallery',
+      key: 'gallery',
     },
     {
       title: 'Actions',
@@ -278,6 +284,12 @@ const ManageEventsPage = ({ userRole, handleLogout }) => {
                 <Option value="Central Standard Time">Central Standard Time</Option>
                 <Option value="Eastern Standard Time">Eastern Standard Time</Option>
               </Select>
+            </Form.Item>
+            <Form.Item
+              label="Gallery"
+              name="gallery"
+            >
+              <Input placeholder="Enter Gallery Link" />
             </Form.Item>
             <Form.Item>
               <Space>
