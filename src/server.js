@@ -4,8 +4,9 @@ const cors = require('cors');
 const mysql = require('mysql');
 const path = require('path');
 const bcrypt = require('bcrypt');
-const { body, validationResult } = require('express-validator');
+const { check, validationResult ,body} = require('express-validator');
 const app = express();
+const nodemailer = require('nodemailer');
 
 app.use(cors());
 app.use(express.json());
@@ -515,6 +516,7 @@ app.delete('/api/events/:id', (req, res) => {
     res.json({ message: 'Event deleted successfully' });
   });
 });
+
 
 app.listen(process.env.PORT || 8000, () => {
   console.log(`Server is running on port ${process.env.PORT || 8000}`);

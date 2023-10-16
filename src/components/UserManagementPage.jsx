@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import NavBar from './NavBar';
 import axios from 'axios';
-import { Table, Input, Button, Select } from 'antd';
+import { Table, Input, Button, Select, Modal } from 'antd';
 import '../stylings/usermanagementPage.css';
 
 const { Column } = Table;
@@ -13,6 +13,11 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [newRole, setNewRole] = useState('');
+
+  const isValidEmail = (email) => {
+    const emailPattern = /^[A-Za-z0-9._%+-]+@gmail\.com$/;
+    return emailPattern.test(email);
+  };
 
   const fetchAdmins = useCallback(async () => {
     const res = await axios.get('/api/admins');
@@ -30,7 +35,13 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
   }, []);
 
   const handleUserCreation = () => {
-    if (!newUsername || !newPassword || !newRole) return;
+    if (!newUsername || !newPassword || !newRole || !isValidEmail(newUsername)) {
+      Modal.error({
+        title: 'Invalid Email',
+        content: 'Please enter a valid Gmail email address as the username.',
+      });
+      return;
+    }
 
     axios
       .post('/api/createUser', { username: newUsername, password: newPassword, role: newRole })
@@ -38,7 +49,6 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
         setNewUsername('');
         setNewPassword('');
         setNewRole('');
-        // Fetch the updated user lists to reflect changes
         fetchAdmins();
         fetchShowAdmins();
       })
@@ -49,12 +59,12 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
     axios
       .put(`/api/makeAdmin/${username}`)
       .then(() => {
-        // Fetch the updated user lists to reflect changes
         fetchAdmins();
         fetchShowAdmins();
       })
       .catch((err) => console.error(err));
   };
+  
 
   const handleRemoveAccess = (username, role) => {
     let endpoint;
@@ -73,7 +83,6 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
     axios
       .put(endpoint)
       .then(() => {
-        // Fetch the updated user lists to reflect changes
         fetchAdmins();
         fetchShowAdmins();
       })
@@ -91,7 +100,7 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
       <div className="table-container">
         <h1 className="table-title">Admin Users</h1>
         <Table dataSource={admins} rowKey="id" pagination={{ pageSize: 5 }}>
-          <Column title="ID" dataIndex="id" key="id" />
+        <Column title="ID" dataIndex="id" key="id" />
           <Column title="Username" dataIndex="username" key="username" />
           <Column
             title="Action"
@@ -153,7 +162,7 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
         <h1 className="form-title">Add User</h1>
         <div className="add-user-form">
           <Input
-            placeholder="Username"
+            placeholder="Username (Gmail Email)"
             value={newUsername}
             onChange={(e) => setNewUsername(e.target.value)}
           />
@@ -181,3 +190,4 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
 };
 
 export default UserManagementPage;
+
