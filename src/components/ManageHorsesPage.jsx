@@ -11,7 +11,7 @@ const ManageHorsesPage = ({ userRole, handleLogout }) => {
   const [showClassInput, setShowClassInput] = useState(''); // State to input Show Classes
   const [classInput, setClassInput] = useState([]); // State to select Show Classes
   const [horseNameInput, setHorseNameInput] = useState('');
-  const [underweightInput, setUnderweightInput] = useState('F');
+  const [underweightInput, setUnderweightInput] = useState('UnderWeight');
   const [tableData, setTableData] = useState([]);
   // const [pasteData, setPasteData] = useState('');
   const [showClasses, setShowClasses] = useState([]);

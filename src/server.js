@@ -4,9 +4,8 @@ const cors = require('cors');
 const mysql = require('mysql');
 const path = require('path');
 const bcrypt = require('bcrypt');
-const { check, validationResult ,body} = require('express-validator');
+const { validationResult ,body} = require('express-validator');
 const app = express();
-const nodemailer = require('nodemailer');
 
 app.use(cors());
 app.use(express.json());
@@ -133,7 +132,7 @@ app.post('/api/login', async (req, res) => {
 });
 
 app.get('/api/showadmins', (req, res) => {
-  const query = 'SELECT username FROM showadmins';
+  const query = 'SELECT username, contact_number FROM showadmins';
 
   connection.query(query, (err, results) => {
     if (err) {
@@ -147,7 +146,7 @@ app.get('/api/showadmins', (req, res) => {
 });
 
 app.get('/api/admins', (req, res) => {
-  const query = 'SELECT username FROM admins';
+  const query = 'SELECT username, contact_number FROM admins';
 
   connection.query(query, (err, results) => {
     if (err) {
@@ -162,7 +161,7 @@ app.get('/api/admins', (req, res) => {
 
 app.put('/api/showadmins/:username', async (req, res) => {
   const { username } = req.params;
-
+  const { contact_number } = req.body;
   const showAdminQuery = 'SELECT * FROM showadmins WHERE username = ?';
   connection.query(showAdminQuery, [username], (err, results) => {
     if (err || results.length === 0) {
@@ -181,8 +180,8 @@ app.put('/api/showadmins/:username', async (req, res) => {
         return;
       }
 
-      const addAdminQuery = 'INSERT INTO admins (username, password) VALUES (?, ?)';
-      connection.query(addAdminQuery, [username, password], (err) => {
+      const addAdminQuery = 'INSERT INTO admins (username, password, contact_number) VALUES (?, ?, ?)';
+      connection.query(addAdminQuery, [username, password, contact_number], (err) => {
         if (err) {
           console.error('Error adding admin:', err);
           res.status(500).json({ error: 'Failed to update admin status' });
@@ -196,8 +195,8 @@ app.put('/api/showadmins/:username', async (req, res) => {
 });
 
 app.get('/api/users', async (req, res) => {
-  const adminQuery = 'SELECT username, \'admin\' as role FROM admins';
-  const showAdminQuery = 'SELECT username, \'showadmin\' as role FROM showadmins';
+  const adminQuery = 'SELECT username, contact_number \'admin\' as role FROM admins';
+  const showAdminQuery = 'SELECT username, contact_number \'showadmin\' as role FROM showadmins';
 
   const [adminResults, showAdminResults] = await Promise.all([
     new Promise((resolve, reject) => 
@@ -253,6 +252,8 @@ app.post(
 
 app.put('/api/makeAdmin/:username', async (req, res) => {
   const { username } = req.params;
+  const { contact_number } = req.body; // Get the contact_number from the request
+  console.log('Received data:', { username, contact_number }); // Add this line for logging
 
   // First, we need to get the password of the showadmin who is being made an admin
   const showAdminQuery = 'SELECT * FROM showadmins WHERE username = ?';
@@ -274,9 +275,9 @@ app.put('/api/makeAdmin/:username', async (req, res) => {
         return;
       }
 
-      // Add the user to the admins table
-      const addAdminQuery = 'INSERT INTO admins (username, password) VALUES (?, ?)';
-      connection.query(addAdminQuery, [username, password], (err) => {
+      // Add the user to the admins table, including the contact_number
+      const addAdminQuery = 'INSERT INTO admins (username, password, contact_number) VALUES (?, ?, ?)';
+      connection.query(addAdminQuery, [username, password, contact_number], (err) => {
         if (err) {
           console.error('Error adding admin:', err);
           res.status(500).json({ error: 'Failed to update admin status' });
@@ -308,6 +309,7 @@ app.post('/api/createUser',
   [
     body('username').notEmpty().withMessage('Username is required').bail().isString().withMessage('Username must be a string'),
     body('password').notEmpty().withMessage('Password is required').bail().isString().withMessage('Password must be a string'),
+    body('contact_number').notEmpty().withMessage('Contact Number is required').bail().isString().withMessage('Contact Number must be a string'),
     body('role').notEmpty().withMessage('Role is required').bail().isIn(['admin', 'showadmin']).withMessage('Invalid user role')
   ],
   async (req, res) => {
@@ -316,20 +318,20 @@ app.post('/api/createUser',
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { username, password, role } = req.body;
+    const { username, password, contact_number, role } = req.body;
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     let insertQuery;
     if (role === 'showadmin') {
-      insertQuery = 'INSERT INTO showadmins (username, password) VALUES (?, ?)';
+      insertQuery = 'INSERT INTO showadmins (username, password, contact_number) VALUES (?, ?, ?)';
     } else if (role === 'admin') {
-      insertQuery = 'INSERT INTO admins (username, password) VALUES (?, ?)';
+      insertQuery = 'INSERT INTO admins (username, password, contact_number) VALUES (?, ?, ?)';
     } else {
       return;
     }
 
-    connection.query(insertQuery, [username, hashedPassword], (err) => {
+    connection.query(insertQuery, [username, hashedPassword, contact_number], (err) => {
       if (err) {
         console.error('Error creating user:', err);
         res.status(500).json({ error: 'Failed to create user' });
@@ -516,7 +518,6 @@ app.delete('/api/events/:id', (req, res) => {
     res.json({ message: 'Event deleted successfully' });
   });
 });
-
 
 app.listen(process.env.PORT || 8000, () => {
   console.log(`Server is running on port ${process.env.PORT || 8000}`);

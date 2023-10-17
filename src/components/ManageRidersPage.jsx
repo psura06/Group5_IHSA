@@ -12,7 +12,7 @@ const ManageRidersPage = ({ userRole, handleLogout }) => {
   const [classInput, setClassInput] = useState(''); // State to select Show Classes
   const [riderNameInput, setRiderNameInput] = useState('');
   const [schoolInput, setSchoolInput] = useState('');
-  const [overweightInput, setOverweightInput] = useState('F');
+  const [overweightInput, setOverweightInput] = useState('OverWeight');
   const [tableData, setTableData] = useState([]);
   const [pasteData, setPasteData] = useState('');
   const [idInput, setIdInput] = useState('');
@@ -284,7 +284,7 @@ const ManageRidersPage = ({ userRole, handleLogout }) => {
             <Col span={3}>
               <Input placeholder="School" value={schoolInput} onChange={(e) => setSchoolInput(e.target.value)} />
             </Col>
-            <Col span={2}>
+            <Col span={3}>
               <Select style={{ width: '100%' }} value={overweightInput} onChange={(value) => setOverweightInput(value)}>
                 <Option value="T">T</Option>
                 <Option value="F">F</Option>

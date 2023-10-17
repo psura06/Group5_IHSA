@@ -13,58 +13,88 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [newRole, setNewRole] = useState('');
+  const [contactNumber, setContactNumber] = useState('');
 
   const isValidEmail = (email) => {
-    const emailPattern = /^[A-Za-z0-9._%+-]+@gmail\.com$/;
+    const emailPattern = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/;
     return emailPattern.test(email);
+  };
+
+  const isValidContactNumber = (number) => {
+    const contactNumberPattern = /^\d{10}$/;
+    return contactNumberPattern.test(number);
+  };
+
+  const formatContactNumber = (number, shouldFormat = true) => {
+    if (!shouldFormat) {
+      return number;
+    }
+    return `(${number.slice(0, 3)})-${number.slice(3, 6)}-${number.slice(6)}`;
   };
 
   const fetchAdmins = useCallback(async () => {
     const res = await axios.get('/api/admins');
     const dataWithIds = res.data
       .filter((admin) => admin.username !== loggedInUser)
-      .map((admin, index) => ({ ...admin, role: 'admin', id: index + 1 }));
+      .map((admin, index) => ({
+        ...admin,
+        role: 'admin',
+        id: index + 1,
+        unformattedContactNumber: admin.contact_number,
+        contactNumber: formatContactNumber(admin.contact_number),
+      }));
     setAdmins(dataWithIds);
   }, [loggedInUser]);
 
   const fetchShowAdmins = useCallback(async () => {
     const res = await axios.get('/api/showadmins');
     const dataWithIds = res.data
-      .map((admin, index) => ({ ...admin, role: 'showadmin', id: index + 1 }));
+      .map((admin, index) => ({
+        ...admin,
+        role: 'showadmin',
+        id: index + 1,
+        unformattedContactNumber: admin.contact_number,
+        contactNumber: formatContactNumber(admin.contact_number),
+      }));
     setShowAdmins(dataWithIds);
   }, []);
 
   const handleUserCreation = () => {
-    if (!newUsername || !newPassword || !newRole || !isValidEmail(newUsername)) {
+    if (!newUsername || !newPassword || !newRole || !isValidEmail(newUsername) || !isValidContactNumber(contactNumber)) {
       Modal.error({
-        title: 'Invalid Email',
-        content: 'Please enter a valid Gmail email address as the username.',
+        title: 'Invalid Fields',
+        content: 'Please fill in all the mandatory fields with valid values: Username, Password, Role, and Contact Number (10 digits only).',
       });
       return;
     }
 
     axios
-      .post('/api/createUser', { username: newUsername, password: newPassword, role: newRole })
+      .post('/api/createUser', {
+        username: newUsername,
+        password: newPassword,
+        role: newRole,
+        contact_number: contactNumber,
+      })
       .then(() => {
         setNewUsername('');
         setNewPassword('');
         setNewRole('');
+        setContactNumber('');
         fetchAdmins();
         fetchShowAdmins();
       })
       .catch((err) => console.error(err));
   };
 
-  const handleMakeAdmin = (username) => {
+  const handleMakeAdmin = (username, unformattedContactNumber) => {
     axios
-      .put(`/api/makeAdmin/${username}`)
+      .put(`/api/makeAdmin/${username}`, { contact_number: unformattedContactNumber })
       .then(() => {
         fetchAdmins();
         fetchShowAdmins();
       })
       .catch((err) => console.error(err));
   };
-  
 
   const handleRemoveAccess = (username, role) => {
     let endpoint;
@@ -100,8 +130,14 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
       <div className="table-container">
         <h1 className="table-title">Admin Users</h1>
         <Table dataSource={admins} rowKey="id" pagination={{ pageSize: 5 }}>
-        <Column title="ID" dataIndex="id" key="id" />
+          <Column title="ID" dataIndex="id" key="id" />
           <Column title="Username" dataIndex="username" key="username" />
+          <Column
+            title="Contact Number"
+            dataIndex="unformattedContactNumber"
+            key="contactNumber"
+            render={(text, record) => formatContactNumber(record.unformattedContactNumber)}
+          />
           <Column
             title="Action"
             key="action"
@@ -129,6 +165,12 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
           <Column title="ID" dataIndex="id" key="id" />
           <Column title="Username" dataIndex="username" key="username" />
           <Column
+            title="Contact Number"
+            dataIndex="unformattedContactNumber"
+            key="contactNumber"
+            render={(text, record) => formatContactNumber(record.unformattedContactNumber)}
+          />
+          <Column
             title="Action"
             key="action"
             render={(text, record) => (
@@ -137,7 +179,7 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
                   <Button
                     type="primary"
                     size="small"
-                    onClick={() => handleMakeAdmin(record.username)}
+                    onClick={() => handleMakeAdmin(record.username, record.unformattedContactNumber)}
                   >
                     Make Admin
                   </Button>
@@ -162,15 +204,22 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
         <h1 className="form-title">Add User</h1>
         <div className="add-user-form">
           <Input
-            placeholder="Username (Gmail Email)"
+            placeholder="Username (Email)"
             value={newUsername}
             onChange={(e) => setNewUsername(e.target.value)}
           />
-          <Input
-            type="password"
+          <Input.Password
             placeholder="Password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
+          />
+                    <Input
+            placeholder="Contact Number (e.g., 1234567890)"
+            value={formatContactNumber(contactNumber, false)} // Pass false to prevent formatting
+            onChange={(e) => {
+              const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+              setContactNumber(value); // Store the unformatted value
+            }}
           />
           <Select
             placeholder="Role"
@@ -190,4 +239,3 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
 };
 
 export default UserManagementPage;
-
