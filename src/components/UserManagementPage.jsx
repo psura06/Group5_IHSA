@@ -146,12 +146,14 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
                 {record.username !== loggedInUser && (
                   <span>
                     <Button
-                      type="danger"
-                      size="small"
-                      onClick={() => handleRemoveAccess(record.username, record.role)}
-                    >
-                      Remove Access
-                    </Button>
+  type="danger"
+  size="small"
+  style={{ backgroundColor: 'red', color: 'white' }}
+  onClick={() => handleRemoveAccess(record.username, record.role)}
+>
+  Remove Access
+</Button>
+
                   </span>
                 )}
               </strong>
@@ -187,12 +189,13 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
                 {record.username !== loggedInUser && (
                   <span>
                     <Button
-                      type="danger"
-                      size="small"
-                      onClick={() => handleRemoveAccess(record.username, record.role)}
-                    >
-                      Remove Access
-                    </Button>
+                    type="danger"
+                    size="small"
+                    style={{ backgroundColor: 'red', color: 'white' }}
+                    onClick={() => handleRemoveAccess(record.username, record.role)}
+                  >
+                    Remove Access
+                  </Button>
                   </span>
                 )}
               </strong>
