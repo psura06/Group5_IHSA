@@ -9,9 +9,10 @@
   }
   
   .table-container {
-    height: 300px;
+
     width: 100%;
-    margin-bottom: 60px;
+    margin-bottom: 20px;
+
   }
   
   .table-title {
@@ -25,7 +26,7 @@
     align-items: center;
     justify-content: flex-start;
     width: 100%;
-    margin-top: 10px;
+    margin-top: 20px;
     padding: 20px;
     box-sizing: border-box;
   }
@@ -44,7 +45,7 @@
   }
   
   .create-user-button {
-    align-self: flex-end;
+    align-self: center;
   }
   
   .action-button {
@@ -59,4 +60,13 @@
   
   .action-button-right {
     margin-left: 10px;
+  }
+
+  .ant-table {
+    max-height: 500px; /* Set a maximum height */
+    overflow-y: auto; /* Enable vertical scrolling */
+  }
+  
+  .ant-table-pagination {
+    margin-top: 10px; /* Add margin between tables */
   }
