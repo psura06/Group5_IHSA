@@ -33,9 +33,11 @@
   padding: 30px;
   border-radius: 15px;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-  width: 100%;
   box-sizing: border-box;
-  max-width: 300px; /* Set a maximum width for the card */
+  width: 100%;
+  max-width: 300px; /* Remove this line */
+  margin: 0 auto; /* Center the card horizontally */
+  align-items: center; /* Center the content horizontally */
 }
 
 .right-image {
@@ -54,10 +56,17 @@
 .login-card label {
   font-weight: bold;
   margin-top: 10px;
+  margin-bottom: 5px; /* Add a margin below labels */
+  margin-right: 15px;
+}
+
+.login-card label Popover {
+  margin-left: 10px; /* Add margin between labels and InfoCircleOutlined */
 }
 
 .login-card input {
-  margin-bottom: 25px;
+  width: 80%; /* Make the input fields 80% wide */
+  margin-bottom: 15px; /* Increase the margin for the input fields */
   margin-top: 7px;
   padding: 10px;
   border-radius: 5px;
@@ -71,14 +80,15 @@
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  margin-top: 5px;
+  margin-top: 15px; /* Increase the margin to center the button */
   margin-bottom: 5px;
 }
 
 .forgot-links {
   display: flex;
-  justify-content: space-between;
+  flex-direction: row; 
   margin-top: 10px;
+  margin-bottom: 10px; /* Add margin between "Forgot Username" and "Forgot Password" */
   color: blue;
   font-size: small;
 }
@@ -100,4 +110,28 @@
   .right-image {
     display: none;
   }
+}
+
+/* Add these styles to your loginadminPage.css */
+.password-input {
+  position: relative;
+}
+
+.password-eye-icon {
+  position: absolute;
+  top: 43%;
+  transform: translateY(-50%);
+  bottom: 50%;
+  right: 40px; /* Adjust the right spacing as needed */
+  cursor: pointer;
+}
+
+/* Styles for the eye icon */
+.password-eye-icon svg {
+  font-size: 20px; /* Adjust the icon size as needed */
+  color: #888; /* Icon color when not focused */
+}
+
+.password-input input[type="password"]:focus + .password-eye-icon svg {
+  color: #1890ff; /* Icon color when the password field is focused */
 }
