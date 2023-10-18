@@ -18,7 +18,6 @@ import Image4 from '../assets/carousel/c4.jpg';
 import Image5 from '../assets/carousel/c5.jpg';
 
 const HomePage = ({ userRole, handleLogout }) => { 
-  console.log('HomePage rendered');
   const carouselImages = [Image1, Image2, Image3, Image4, Image5];
   const eventCardContainerRef = useRef(null);
   const [ongoingEvents, setOngoingEvents] = useState([]);
