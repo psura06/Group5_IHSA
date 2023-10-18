@@ -74,13 +74,17 @@ app.post('/api/login', async (req, res) => {
 
   const adminQuery = 'SELECT * FROM admins WHERE username = ?';
   const showAdminQuery = 'SELECT * FROM showadmins WHERE username = ?';
+  const superadminQuery = 'SELECT * FROM superadmin WHERE username = ?';
 
-  const [adminResults, showAdminResults] = await Promise.all([
+  const [adminResults, showAdminResults, superadminResults] = await Promise.all([
     new Promise((resolve, reject) =>
       connection.query(adminQuery, [username], (err, results) => (err ? reject(err) : resolve(results)))
     ),
     new Promise((resolve, reject) =>
       connection.query(showAdminQuery, [username], (err, results) => (err ? reject(err) : resolve(results)))
+    ),
+    new Promise((resolve, reject) =>
+      connection.query(superadminQuery, [username], (err, results) => (err ? reject(err) : resolve(results)))
     ),
   ]);
 
@@ -126,7 +130,30 @@ app.post('/api/login', async (req, res) => {
       console.log('ShowAdmin Login successful:', { username, role });
       res.json({ message: 'Login successful', role });
     });
-  } else {
+  } 
+  else if (superadminResults.length > 0) {
+    const superadmin = superadminResults[0];
+
+    bcrypt.compare(password, superadmin.password, function(err, isMatch) {
+      if (err) {
+        console.error('Error while comparing passwords:', err);
+        res.status(500).json({ error: 'Failed to authenticate' });
+        return;
+      }
+
+      if (!isMatch) {
+        console.log('Invalid password:', password);
+        res.status(401).json({ error: 'Invalid password' });
+        return;
+      }
+
+      const role = 'superadmin';
+
+      console.log('SuperAdmin Login successful:', { username, role });
+      res.json({ message: 'Login successful', role });
+    });
+  }
+  else {
     res.status(401).json({ error: 'Invalid username' });
   }
 });
@@ -516,6 +543,137 @@ app.delete('/api/events/:id', (req, res) => {
     }
 
     res.json({ message: 'Event deleted successfully' });
+  });
+});
+
+// Announcements
+app.post('/api/announcements', (req, res) => {
+  const { title, content, date, time } = req.body;
+
+  const insertQuery = 'INSERT INTO announcements (title, content, date, time) VALUES (?, ?, ?, ?)';
+
+  connection.query(insertQuery, [title, content, date, time], (err, results) => {
+    if (err) {
+      console.error('Error creating announcement:', err);
+      res.status(500).json({ error: 'Failed to create announcement' });
+      return;
+    }
+
+    res.json({ message: 'Announcement created successfully' });
+  });
+});
+
+app.put('/api/announcements/:id', async (req, res) => {
+  const { id } = req.params;
+  const updatedAnnouncement = req.body;
+
+  const updateQuery = 'UPDATE announcements SET ? WHERE id = ?';
+
+  connection.query(updateQuery, [updatedAnnouncement, id], (err, results) => {
+    if (err) {
+      console.error('Error updating announcement:', err);
+      res.status(500).json({ error: 'Failed to update announcement' });
+      return;
+    }
+
+    res.json({ message: 'Announcement updated successfully' });
+  });
+});
+
+app.delete('/api/announcements/:id', (req, res) => {
+  const { id } = req.params;
+
+  const deleteQuery = 'DELETE FROM announcements WHERE id = ?';
+
+  connection.query(deleteQuery, [id], (err, results) => {
+    if (err) {
+      console.error('Error deleting announcement:', err);
+      res.status(500).json({ error: 'Failed to delete announcement' });
+      return;
+    }
+
+    res.json({ message: 'Announcement deleted successfully' });
+  });
+});
+
+// edit admins and show admins
+app.put('/api/admins/:username', (req, res) => {
+  const { username } = req.params;
+  const { newUsername, contact_number } = req.body;
+
+  const updateQuery = 'UPDATE admins SET username = ?, contact_number = ? WHERE username = ?';
+
+  connection.query(updateQuery, [newUsername, contact_number, username], (err, result) => {
+    if (err) {
+      console.error('Error updating admin username and contact number:', err);
+      res.status(500).json({ error: 'Failed to update admin username and contact number' });
+      return;
+    }
+    
+    res.json({ message: 'Admin username and contact number updated successfully' });
+  });
+});
+
+app.put('/api/showadmins/:username', (req, res) => {
+  const { username } = req.params;
+  const { newUsername, contact_number } = req.body;
+
+  const updateQuery = 'UPDATE showadmins SET username = ?, contact_number = ? WHERE username = ?';
+
+  connection.query(updateQuery, [newUsername, contact_number, username], (err, result) => {
+    if (err) {
+      console.error('Error updating showadmin username and contact number:', err);
+      res.status(500).json({ error: 'Failed to update showadmin username and contact number' });
+      return;
+    }
+
+    res.json({ message: 'ShowAdmin username and contact number updated successfully' });
+  });
+});
+
+app.put('/api/updatePassword/:username', async (req, res) => {
+  const { username } = req.params;
+  const { newPassword, role } = req.body;
+
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+  let updateQuery;
+  if (role === 'admin') {
+    updateQuery = 'UPDATE admins SET password = ? WHERE username = ?';
+  } else if (role === 'showadmin') {
+    updateQuery = 'UPDATE showadmins SET password = ? WHERE username = ?';
+  } else {
+    return res.status(400).json({ error: 'Invalid user role' });
+  }
+
+  connection.query(updateQuery, [hashedPassword, username], (err) => {
+    if (err) {
+      console.error('Error updating password:', err);
+      res.status(500).json({ error: 'Failed to update password' });
+      return;
+    }
+
+    res.json({ message: 'Password updated successfully' });
+  });
+});
+
+// Add a new API route to fetch the superadmin username
+app.get('/api/superadmin', (req, res) => {
+  const query = 'SELECT username FROM superadmin';
+
+  connection.query(query, (err, results) => {
+    if (err) {
+      console.error('Error retrieving superadmin username:', err);
+      res.status(500).json({ error: 'Failed to retrieve superadmin username' });
+      return;
+    }
+
+    if (results.length > 0) {
+      const superadminUsername = results[0].username;
+      res.json({ superadminUsername });
+    } else {
+      res.status(404).json({ error: 'Superadmin username not found' });
+    }
   });
 });
 
