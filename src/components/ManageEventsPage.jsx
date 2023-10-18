@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Table, Button, Modal, Form, Input, Select, Space, Popconfirm } from 'antd';
+import { Table, Button, Modal, Form, Input, Select, Space, Popconfirm, message } from 'antd';
 import axios from 'axios';
 import NavBar from './NavBar';
 import DateTime from 'react-datetime';
@@ -14,25 +14,30 @@ const ManageEventsPage = ({ userRole, handleLogout }) => {
   const [form] = Form.useForm();
   const [editingEvent, setEditingEvent] = useState(null);
 
-  const fetchEvents = useCallback(async () => { // Wrap fetchEvents with useCallback
+  const showSuccessMessage = (text) => {
+    message.success(text);
+  };
+
+  const showErrorMessage = (text) => {
+    message.error(text);
+  };
+
+  const fetchEvents = useCallback(async () => {
     try {
       const response = await axios.get('/api/events');
       setEvents(response.data.map(formatEventDates));
     } catch (error) {
       console.error('Error fetching events:', error);
     }
-  }, []); // Empty dependency array because fetchEvents doesn't depend on any props or state
+  }, []);
 
   useEffect(() => {
     fetchEvents();
   }, [fetchEvents]);
-  
 
   const formatEventDates = (event) => {
-    // Format start_date and end_date
     event.start_date = moment(event.start_date).format('YYYY-MM-DD');
     event.end_date = moment(event.end_date).format('YYYY-MM-DD');
-    // Format start_time and end_time
     event.start_time = moment(event.start_time, 'HH:mm:ss').format('HH:mm');
     event.end_time = moment(event.end_time, 'HH:mm:ss').format('HH:mm');
     return event;
@@ -43,7 +48,9 @@ const ManageEventsPage = ({ userRole, handleLogout }) => {
       title: 'Image',
       dataIndex: 'image',
       key: 'image',
-      render: (text, record) => <img src={text} alt={`Event ${record.name}`} style={{ width: '50px', height: '50px' }} />,
+      render: (text, record) => (
+        <img src={text} alt={`Event ${record.name}`} style={{ width: '50px', height: '50px' }} />
+      ),
     },
     {
       title: 'Name',
@@ -140,23 +147,23 @@ const ManageEventsPage = ({ userRole, handleLogout }) => {
 
   const onFinish = async (values) => {
     try {
-      // Format date and time values before sending them to the server
       values.start_date = moment(values.start_date).format('YYYY-MM-DD');
       values.end_date = moment(values.end_date).format('YYYY-MM-DD');
       values.start_time = moment(values.start_time, 'HH:mm').format('HH:mm:ss');
       values.end_time = moment(values.end_time, 'HH:mm').format('HH:mm:ss');
 
       if (editingEvent) {
-        // Edit existing event
         await axios.put(`/api/events/${editingEvent.id}`, values);
+        showSuccessMessage('Event updated successfully');
       } else {
-        // Create a new event
         await axios.post('/api/events', values);
+        showSuccessMessage('Event created successfully');
       }
       fetchEvents();
       form.resetFields();
       setVisible(false);
     } catch (error) {
+      showErrorMessage('Error creating/editing event');
       console.error('Error creating/editing event:', error);
     }
   };
@@ -164,6 +171,7 @@ const ManageEventsPage = ({ userRole, handleLogout }) => {
   const handleDelete = async (eventId) => {
     try {
       await axios.delete(`/api/events/${eventId}`);
+      showSuccessMessage('Event deleted successfully');
       fetchEvents();
     } catch (error) {
       console.error('Error deleting event:', error);
@@ -185,112 +193,121 @@ const ManageEventsPage = ({ userRole, handleLogout }) => {
           footer={null}
         >
           <Form form={form} name="createEventForm" onFinish={onFinish}>
-            <Form.Item
-              label="Image"
-              name="image"
-              rules={[{ required: true, message: 'Please enter the image URL' }]}
-            >
-              <Input placeholder="Enter image URL" />
-            </Form.Item>
-            <Form.Item
-              label="Name"
-              name="name"
-              rules={[{ required: true, message: 'Please enter the event name' }]}
-            >
-              <Input placeholder="Enter event name" />
-            </Form.Item>
-            <Form.Item label="Venue" name="venue" rules={[{ required: true, message: 'Please enter the venue' }]}>
-              <Input placeholder="Enter venue" />
-            </Form.Item>
-            <Form.Item
-              label="Region"
-              name="region"
-              rules={[{ required: true, message: 'Please select a region' }]}
-            >
-              <Select placeholder="Select region">
-                <Option value="1">1</Option>
-                <Option value="2">2</Option>
-                <Option value="3">3</Option>
-                <Option value="4">4</Option>
-                <Option value="5">5</Option>
-              </Select>
-            </Form.Item>
-            <Form.Item
-              label="Zone"
-              name="zone"
-              rules={[{ required: true, message: 'Please select a zone' }]}
-            >
-              <Select placeholder="Select zone">
-                <Option value="1">1</Option>
-                <Option value="2">2</Option>
-                <Option value="3">3</Option>
-                <Option value="4">4</Option>
-                <Option value="5">5</Option>
-                <Option value="6">6</Option>
-                <Option value="7">7</Option>
-                <Option value="8">8</Option>
-              </Select>
-            </Form.Item>
-            <Form.Item
-              label="Discipline"
-              name="discipline"
-              rules={[{ required: true, message: 'Please select a discipline' }]}
-            >
-              <Select placeholder="Select discipline">
-                <Option value="Hunter Seat">Hunter Seat</Option>
-                <Option value="Western Seat">Western Seat</Option>
-              </Select>
-            </Form.Item>
-            <Form.Item label="Description" name="description"
-            rules={[{ required: true, message: 'Please enter the description' }]}>
-            <Input.TextArea placeholder="Description" />
-          </Form.Item>
-            <Form.Item
-              label="Start Date"
-              name="start_date"
-              rules={[{ required: true, message: 'Please select a start date' }]}
-            >
-              <DateTime dateFormat="YYYY-MM-DD" timeFormat={false} />
-            </Form.Item>
-            <Form.Item
-              label="Start Time"
-              name="start_time"
-              rules={[{ required: true, message: 'Please select a start time' }]}
-            >
-              <DateTime dateFormat={false} timeFormat="HH:mm" />
-            </Form.Item>
-            <Form.Item
-              label="End Date"
-              name="end_date"
-              rules={[{ required: true, message: 'Please select an end date' }]}
-            >
-              <DateTime dateFormat="YYYY-MM-DD" timeFormat={false} />
-            </Form.Item>
-            <Form.Item
-              label="End Time"
-              name="end_time"
-              rules={[{ required: true, message: 'Please select an end time' }]}
-            >
-              <DateTime dateFormat={false} timeFormat="HH:mm" />
-            </Form.Item>
-            <Form.Item
-              label="Time Zone"
-              name="time_zone"
-              rules={[{ required: true, message: 'Please select a time zone' }]}
-            >
-              <Select placeholder="Select time zone">
-                <Option value="Pacific Standard Time">Pacific Standard Time</Option>
-                <Option value="Mountain Standard Time">Mountain Standard Time</Option>
-                <Option value="Central Standard Time">Central Standard Time</Option>
-                <Option value="Eastern Standard Time">Eastern Standard Time</Option>
-              </Select>
-            </Form.Item>
-            <Form.Item
-              label="Gallery"
-              name="gallery"
-            >
-              <Input placeholder="Enter Gallery Link" />
-            </Form.Item>
+            <div>
+              <Form.Item
+                label="Image"
+                name="image"
+                rules={[{ required: true, message: 'Please enter the image URL' }]}
+              >
+                <Input placeholder="Enter image URL" />
+              </Form.Item>
+              <Form.Item
+                label="Name"
+                name="name"
+                rules={[{ required: true, message: 'Please enter the event name' }]
+                }>
+                <Input placeholder="Enter event name" />
+              </Form.Item>
+              <Form.Item
+                label="Venue"
+                name="venue"
+                rules={[{ required: true, message: 'Please enter the venue' }]
+                }>
+                <Input placeholder="Enter venue" />
+              </Form.Item>
+              <Form.Item
+                label="Region"
+                name="region"
+                rules={[{ required: true, message: 'Please select a region' }]
+                }>
+                <Select placeholder="Select region">
+                  <Option value="1">1</Option>
+                  <Option value="2">2</Option>
+                  <Option value="3">3</Option>
+                  <Option value="4">4</Option>
+                  <Option value="5">5</Option>
+                </Select>
+              </Form.Item>
+              <Form.Item
+                label="Zone"
+                name="zone"
+                rules={[{ required: true, message: 'Please select a zone' }]
+                }>
+                <Select placeholder="Select zone">
+                  <Option value="1">1</Option>
+                  <Option value="2">2</Option>
+                  <Option value="3">3</Option>
+                  <Option value="4">4</Option>
+                  <Option value="5">5</Option>
+                  <Option value="6">6</Option>
+                  <Option value="7">7</Option>
+                  <Option value="8">8</Option>
+                </Select>
+              </Form.Item>
+              <Form.Item
+                label="Discipline"
+                name="discipline"
+                rules={[{ required: true, message: 'Please select a discipline' }]
+                }>
+                <Select placeholder="Select discipline">
+                  <Option value="Hunter Seat">Hunter Seat</Option>
+                  <Option value="Western Seat">Western Seat</Option>
+                </Select>
+              </Form.Item>
+              <Form.Item
+                label="Description"
+                name="description"
+                rules={[{ required: true, message: 'Please enter the description' }]
+                }>
+                <Input.TextArea placeholder="Description" />
+              </Form.Item>
+              <Form.Item
+                label="Start Date"
+                name="start_date"
+                rules={[{ required: true, message: 'Please select a start date' }]
+                }>
+                <DateTime dateFormat="YYYY-MM-DD" timeFormat={false} />
+              </Form.Item>
+              <Form.Item
+                label="Start Time"
+                name="start_time"
+                rules={[{ required: true, message: 'Please select a start time' }]
+                }>
+                <DateTime dateFormat={false} timeFormat="HH:mm" />
+              </Form.Item>
+              <Form.Item
+                label="End Date"
+                name="end_date"
+                rules={[{ required: true, message: 'Please select an end date' }]
+                }>
+                <DateTime dateFormat="YYYY-MM-DD" timeFormat={false} />
+              </Form.Item>
+              <Form.Item
+                label="End Time"
+                name="end_time"
+                rules={[{ required: true, message: 'Please select an end time' }]
+                }>
+                <DateTime dateFormat={false} timeFormat="HH:mm" />
+              </Form.Item>
+              <Form.Item
+                label="Time Zone"
+                name="time_zone"
+                rules={[{ required: true, message: 'Please select a time zone' }]
+                }>
+                <Select placeholder="Select time zone">
+                  <Option value="Pacific Standard Time">Pacific Standard Time</Option>
+                  <Option value="Mountain Standard Time">Mountain Standard Time</Option>
+                  <Option value="Central Standard Time">Central Standard Time</Option>
+                  <Option value="Eastern Standard Time">Eastern Standard Time</Option>
+                </Select>
+              </Form.Item>
+              <Form.Item
+                label="Gallery"
+                name="gallery"
+              >
+                <Input placeholder="Enter Gallery Link" />
+              </Form.Item>
+            </div>
             <Form.Item>
               <Space>
                 <Button type="primary" htmlType="submit">
