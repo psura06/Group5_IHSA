@@ -11,7 +11,7 @@ const ManageHorsesPage = ({ userRole, handleLogout }) => {
   const [showClassInput, setShowClassInput] = useState(''); // State to input Show Classes
   const [classInput, setClassInput] = useState([]); // State to select Show Classes
   const [horseNameInput, setHorseNameInput] = useState('');
-  const [underweightInput, setUnderweightInput] = useState('UnderWeight');
+  const [underweightInput, setUnderweightInput] = useState('');
   const [tableData, setTableData] = useState([]);
   // const [pasteData, setPasteData] = useState('');
   const [showClasses, setShowClasses] = useState([]);
@@ -209,6 +209,9 @@ const ManageHorsesPage = ({ userRole, handleLogout }) => {
             </Col>
             <Col span={3}>
               <Select style={{ width: '100%' }} value={underweightInput} onChange={(value) => setUnderweightInput(value)}>
+              <Option value="instruction" disabled>
+                  UnderWeight
+                </Option>
                 <Option value="T">T</Option>
                 <Option value="F">F</Option>
               </Select>
