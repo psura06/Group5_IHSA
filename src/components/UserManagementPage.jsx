@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import NavBar from './NavBar';
 import axios from 'axios';
-import { Table, Input, Button, Select, Modal } from 'antd';
+import { Table, Input, Button, Select, Modal, message, Popover } from 'antd';
+import { InfoCircleOutlined } from '@ant-design/icons';
 import '../stylings/usermanagementPage.css';
 
 const { Column } = Table;
@@ -12,16 +13,34 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
   const [showAdmins, setShowAdmins] = useState([]);
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [newRole, setNewRole] = useState('');
+  const [newRole, setNewRole] = useState('instruction');
   const [contactNumber, setContactNumber] = useState('');
-
-  const [confirmRemoveAccess, setConfirmRemoveAccess] = useState(false);
-  const [confirmMakeAdmin, setConfirmMakeAdmin] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const [editingPassword, setEditingPassword] = useState(null);
+  const [newPasswordForEditing, setNewPasswordForEditing] = useState('');
 
   const isValidEmail = (email) => {
     const emailPattern = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/;
     return emailPattern.test(email);
   };
+
+  const isValidPassword = (password) => {
+    // At least 6 characters, one number, one uppercase letter, and one special character
+    const passwordPattern = /^(?=.*\d)(?=.*[A-Z])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{6,}$/;
+    return passwordPattern.test(password);
+  };
+
+  const getPasswordPopoverContent = () => (
+    <div>
+      <p>Password must:</p>
+      <ul>
+        <li>Contain at least 6 characters</li>
+        <li>Include at least one number</li>
+        <li>Include at least one uppercase letter</li>
+        <li>Include at least one special character</li>
+      </ul>
+    </div>
+  );
 
   const isValidContactNumber = (number) => {
     const contactNumberPattern = /^\d{10}$/;
@@ -63,10 +82,18 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
   }, []);
 
   const handleUserCreation = () => {
-    if (!newUsername || !newPassword || !newRole || !isValidEmail(newUsername) || !isValidContactNumber(contactNumber)) {
+    if (
+      !newUsername ||
+      !newPassword ||
+      !newRole ||
+      !isValidEmail(newUsername) ||
+      !isValidContactNumber(contactNumber) ||
+      !isValidPassword(newPassword)
+    ) {
       Modal.error({
         title: 'Invalid Fields',
-        content: 'Please fill in all the mandatory fields with valid values: Username, Password, Role, and Contact Number (10 digits only).',
+        content:
+          'Please fill in all the mandatory fields with valid values: Username, Password, Role, and Contact Number (10 digits only).',
       });
       return;
     }
@@ -85,75 +112,104 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
         setContactNumber('');
         fetchAdmins();
         fetchShowAdmins();
-        showModal(
-          newRole === 'showadmin'
-            ? 'User account has been created as show admin.'
-            : 'User account has been created as admin.'
-        );
+        // Display a success message based on the role
+        message.success(`User added as ${newRole}.`);
       })
-      .catch((err) => console.error(err));
+      .catch((err) => {
+        console.error(err);
+        message.error('Failed to add the user. Please try again later.');
+      });
   };
 
   const handleMakeAdmin = (username, unformattedContactNumber) => {
-    setConfirmMakeAdmin({
-      visible: true,
-      username,
-      unformattedContactNumber,
+    Modal.confirm({
+      title: 'Make Admin',
+      content: 'Are you sure you want to make this user an admin?',
+      onOk: () => {
+        axios
+          .put(`/api/makeAdmin/${username}`, { contact_number: unformattedContactNumber })
+          .then(() => {
+            message.success('User has been made an admin.');
+            fetchAdmins();
+            fetchShowAdmins();
+          })
+          .catch((err) => {
+            console.error(err);
+            message.error('Failed to make the user an admin. Please try again later.');
+          });
+      },
     });
   };
 
   const handleRemoveAccess = (username, role) => {
-    setConfirmRemoveAccess({
-      visible: true,
-      username,
-      role,
+    Modal.confirm({
+      title: 'Remove Access',
+      content: 'Are you sure you want to remove access for this user?',
+      onOk: () => {
+        let endpoint;
+        switch (role) {
+          case 'admin':
+            endpoint = `/api/removeAdmin/${username}`;
+            break;
+          case 'showadmin':
+            endpoint = `/api/removeShowAdmin/${username}`;
+            break;
+          default:
+            console.error(`Invalid role: ${role}`);
+            return;
+        }
+        axios
+          .put(endpoint)
+          .then(() => {
+            message.success('User access has been removed.');
+            fetchAdmins();
+            fetchShowAdmins();
+          })
+          .catch((err) => {
+            console.error(err);
+            message.error('Failed to remove user access. Please try again later.');
+          });
+      },
     });
   };
 
-  const showModal = (text) => {
-    Modal.info({
-      title: 'Notification',
-      content: text,
-    });
-  };
-
-  const confirmMakeAdminAction = () => {
-    const { username, unformattedContactNumber } = confirmMakeAdmin;
-    axios
-      .put(`/api/makeAdmin/${username}`, { contact_number: unformattedContactNumber })
-      .then(() => {
-        fetchAdmins();
-        fetchShowAdmins();
-        showModal('Now user is admin.');
-        setConfirmMakeAdmin(false);
-      })
-      .catch((err) => console.error(err));
-  };
-
-  const confirmRemoveAccessAction = () => {
-    const { username, role } = confirmRemoveAccess;
-    let endpoint;
-    switch (role) {
-      case 'admin':
-        endpoint = `/api/removeAdmin/${username}`;
-        break;
-      case 'showadmin':
-        endpoint = `/api/removeShowAdmin/${username}`;
-        break;
-      default:
-        console.error(`Invalid role: ${role}`);
-        return;
+  const handleEditUser = () => {
+    if (!editingUser) {
+      return;
     }
-
+    const { username, newUsername, contactNumber } = editingUser;
     axios
-      .put(endpoint)
+      .put(`/api/admins/${username}`, {
+        newUsername,
+        contact_number: contactNumber,
+      })
       .then(() => {
+        message.success('User information updated successfully.');
+        setEditingUser(null);
         fetchAdmins();
         fetchShowAdmins();
-        showModal('Access has been removed.');
-        setConfirmRemoveAccess(false);
       })
-      .catch((err) => console.error(err));
+      .catch((err) => {
+        console.error(err);
+        message.error('Failed to update user information. Please try again later.');
+      });
+  };
+
+  const handleEditPassword = (username, role) => {
+    if (isValidPassword(newPasswordForEditing)) {
+      axios
+        .put(`/api/updatePassword/${username}`, { newPassword: newPasswordForEditing, role })
+        .then(() => {
+          message.success('Password updated successfully.');
+          setEditingPassword(null);
+        })
+        .catch((err) => {
+          console.error(err);
+          message.error('Failed to update the password. Please try again later.');
+        });
+    } else {
+      message.error('Invalid password. Password must meet the criteria.');
+    }
   };
 
   useEffect(() => {
@@ -190,6 +246,30 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
                     >
                       Remove Access
                     </Button>
+                    <Button
+                      type="primary"
+                      size="small"
+                      style={{ marginLeft: 10 }}
+                      onClick={() =>
+                        setEditingUser({
+                          username: record.username,
+                          newUsername: record.username,
+                          contactNumber: record.unformattedContactNumber,
+                        })
+                      }
+                    >
+                      Edit
+                    </Button>
+                    {userRole === 'superadmin' && (
+                      <Button
+                        type="primary"
+                        size="small"
+                        style={{ marginLeft: 10 }}
+                        onClick={() => setEditingPassword(record.username)}
+                      >
+                        Edit Password
+                      </Button>
+                    )}
                   </span>
                 )}
               </strong>
@@ -221,19 +301,25 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
                   >
                     Make Admin
                   </Button>
-                </span>
-                {record.username !== loggedInUser && (
-                  <span>
+                  <Button
+                    type="danger"
+                    size="small"
+                    style={{ marginLeft: 10 }}
+                    onClick={() => handleRemoveAccess(record.username, record.role)}
+                  >
+                    Remove Access
+                  </Button>
+                  {userRole === 'superadmin' && (
                     <Button
-                      type="danger"
+                      type="primary"
                       size="small"
-                      style={{ backgroundColor: 'red', color: 'white' }}
-                      onClick={() => handleRemoveAccess(record.username, record.role)}
+                      style={{ marginLeft: 10 }}
+                      onClick={() => setEditingPassword(record.username)}
                     >
-                      Remove Access
+                      Edit Password
                     </Button>
-                  </span>
-                )}
+                  )}
+                </span>
               </strong>
             )}
           />
@@ -246,11 +332,21 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
             placeholder="Username (Email)"
             value={newUsername}
             onChange={(e) => setNewUsername(e.target.value)}
+            addonAfter={
+              <Popover content="Please enter a valid email address." trigger="hover">
+                <InfoCircleOutlined />
+              </Popover>
+            }
           />
           <Input.Password
             placeholder="Password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
+            addonAfter={
+              <Popover content={getPasswordPopoverContent()} trigger="hover">
+                <InfoCircleOutlined />
+              </Popover>
+            }
           />
           <Input
             placeholder="Contact Number (e.g., 1234567890)"
@@ -259,12 +355,20 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
               const value = e.target.value.replace(/\D/g, '').slice(0, 10);
               setContactNumber(value);
             }}
+            addonAfter={
+              <Popover content="Please enter a 10-digit contact number." trigger="hover">
+                <InfoCircleOutlined />
+              </Popover>
+            }
           />
           <Select
-            placeholder="Role"
+            placeholder="Select a Role"
             value={newRole}
             onChange={(value) => setNewRole(value)}
           >
+            <Option value="instruction" disabled>
+              Select a Role
+            </Option>
             <Option value="admin">Admin</Option>
             <Option value="showadmin">Show Admin</Option>
           </Select>
@@ -274,27 +378,60 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
         </div>
       </div>
 
-      {/* Confirmation Modals */}
+      {/* Edit User Modal */}
       <Modal
-        title="Confirm Make Admin"
-        visible={confirmMakeAdmin}
-        onOk={confirmMakeAdminAction}
-        onCancel={() => setConfirmMakeAdmin(false)}
-        okText="Make Admin"
-        cancelText="Cancel"
+        title="Edit User Information"
+        visible={!!editingUser}
+        onOk={handleEditUser}
+        onCancel={() => setEditingUser(null)}
       >
-        Are you sure you want to make this user an admin?
+        {editingUser && (
+          <div>
+            <Input
+              placeholder="New Username"
+              value={editingUser.newUsername}
+              onChange={(e) =>
+                setEditingUser({ ...editingUser, newUsername: e.target.value })
+              }
+            />
+            <Input
+              placeholder="New Contact Number"
+              value={editingUser.contactNumber}
+              onChange={(e) =>
+                setEditingUser({
+                  ...editingUser,
+                  contactNumber: e.target.value.replace(/\D/g, '').slice(0, 10),
+                })
+              }
+            />
+          </div>
+        )}
       </Modal>
 
+      {/* Edit Password Modal */}
       <Modal
-        title="Confirm Remove Access"
-        visible={confirmRemoveAccess}
-        onOk={confirmRemoveAccessAction}
-        onCancel={() => setConfirmRemoveAccess(false)}
-        okText="Remove Access"
-        cancelText="Cancel"
+        title="Edit Password"
+        visible={!!editingPassword}
+        onOk={() => handleEditPassword(editingPassword, 'admin')}
+        onCancel={() => {
+          setEditingPassword(null);
+          setNewPasswordForEditing('');
+        }}
       >
-        Are you sure you want to remove access for this user?
+        {editingPassword && (
+          <div>
+            <Input.Password
+              placeholder="New Password"
+              value={newPasswordForEditing}
+              onChange={(e) => setNewPasswordForEditing(e.target.value)}
+              addonAfter={
+                <Popover content={getPasswordPopoverContent()} trigger="hover">
+                  <InfoCircleOutlined />
+                </Popover>
+              }
+            />
+          </div>
+        )}
       </Modal>
     </div>
   );
