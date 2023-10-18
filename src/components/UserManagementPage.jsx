@@ -15,6 +15,9 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
   const [newRole, setNewRole] = useState('');
   const [contactNumber, setContactNumber] = useState('');
 
+  const [confirmRemoveAccess, setConfirmRemoveAccess] = useState(false);
+  const [confirmMakeAdmin, setConfirmMakeAdmin] = useState(false);
+
   const isValidEmail = (email) => {
     const emailPattern = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/;
     return emailPattern.test(email);
@@ -82,21 +85,53 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
         setContactNumber('');
         fetchAdmins();
         fetchShowAdmins();
+        showModal(
+          newRole === 'showadmin'
+            ? 'User account has been created as show admin.'
+            : 'User account has been created as admin.'
+        );
       })
       .catch((err) => console.error(err));
   };
 
   const handleMakeAdmin = (username, unformattedContactNumber) => {
+    setConfirmMakeAdmin({
+      visible: true,
+      username,
+      unformattedContactNumber,
+    });
+  };
+
+  const handleRemoveAccess = (username, role) => {
+    setConfirmRemoveAccess({
+      visible: true,
+      username,
+      role,
+    });
+  };
+
+  const showModal = (text) => {
+    Modal.info({
+      title: 'Notification',
+      content: text,
+    });
+  };
+
+  const confirmMakeAdminAction = () => {
+    const { username, unformattedContactNumber } = confirmMakeAdmin;
     axios
       .put(`/api/makeAdmin/${username}`, { contact_number: unformattedContactNumber })
       .then(() => {
         fetchAdmins();
         fetchShowAdmins();
+        showModal('Now user is admin.');
+        setConfirmMakeAdmin(false);
       })
       .catch((err) => console.error(err));
   };
 
-  const handleRemoveAccess = (username, role) => {
+  const confirmRemoveAccessAction = () => {
+    const { username, role } = confirmRemoveAccess;
     let endpoint;
     switch (role) {
       case 'admin':
@@ -115,6 +150,8 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
       .then(() => {
         fetchAdmins();
         fetchShowAdmins();
+        showModal('Access has been removed.');
+        setConfirmRemoveAccess(false);
       })
       .catch((err) => console.error(err));
   };
@@ -146,14 +183,13 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
                 {record.username !== loggedInUser && (
                   <span>
                     <Button
-  type="danger"
-  size="small"
-  style={{ backgroundColor: 'red', color: 'white' }}
-  onClick={() => handleRemoveAccess(record.username, record.role)}
->
-  Remove Access
-</Button>
-
+                      type="danger"
+                      size="small"
+                      style={{ backgroundColor: 'red', color: 'white' }}
+                      onClick={() => handleRemoveAccess(record.username, record.role)}
+                    >
+                      Remove Access
+                    </Button>
                   </span>
                 )}
               </strong>
@@ -189,13 +225,13 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
                 {record.username !== loggedInUser && (
                   <span>
                     <Button
-                    type="danger"
-                    size="small"
-                    style={{ backgroundColor: 'red', color: 'white' }}
-                    onClick={() => handleRemoveAccess(record.username, record.role)}
-                  >
-                    Remove Access
-                  </Button>
+                      type="danger"
+                      size="small"
+                      style={{ backgroundColor: 'red', color: 'white' }}
+                      onClick={() => handleRemoveAccess(record.username, record.role)}
+                    >
+                      Remove Access
+                    </Button>
                   </span>
                 )}
               </strong>
@@ -216,12 +252,12 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
           />
-                    <Input
+          <Input
             placeholder="Contact Number (e.g., 1234567890)"
-            value={formatContactNumber(contactNumber, false)} // Pass false to prevent formatting
+            value={formatContactNumber(contactNumber, false)}
             onChange={(e) => {
               const value = e.target.value.replace(/\D/g, '').slice(0, 10);
-              setContactNumber(value); // Store the unformatted value
+              setContactNumber(value);
             }}
           />
           <Select
@@ -237,6 +273,29 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
           </Button>
         </div>
       </div>
+
+      {/* Confirmation Modals */}
+      <Modal
+        title="Confirm Make Admin"
+        visible={confirmMakeAdmin}
+        onOk={confirmMakeAdminAction}
+        onCancel={() => setConfirmMakeAdmin(false)}
+        okText="Make Admin"
+        cancelText="Cancel"
+      >
+        Are you sure you want to make this user an admin?
+      </Modal>
+
+      <Modal
+        title="Confirm Remove Access"
+        visible={confirmRemoveAccess}
+        onOk={confirmRemoveAccessAction}
+        onCancel={() => setConfirmRemoveAccess(false)}
+        okText="Remove Access"
+        cancelText="Cancel"
+      >
+        Are you sure you want to remove access for this user?
+      </Modal>
     </div>
   );
 };

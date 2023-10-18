@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
 import logo1 from '../assets/ihsalogo1.png';
 import image from '../assets/login/horse login.jpg';
+import { Modal } from 'antd'; // Import Modal
 import '../stylings/loginadminPage.css';
 
 const LoginAdminPage = ({ setUserRole }) => {
@@ -11,8 +12,37 @@ const LoginAdminPage = ({ setUserRole }) => {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
+  // State variables for controlling modals
+  const [invalidCredentialsModal, setInvalidCredentialsModal] = useState(false);
+  const [emptyFieldsModal, setEmptyFieldsModal] = useState(false);
+  const [loginSuccessModal, setLoginSuccessModal] = useState(false);
+
+  // Function to open and close modals
+  const showInvalidCredentialsModal = () => {
+    setInvalidCredentialsModal(true);
+  };
+
+  const showEmptyFieldsModal = () => {
+    setEmptyFieldsModal(true);
+  };
+
+  const showLoginSuccessModal = () => {
+    setLoginSuccessModal(true);
+  };
+
+  const closeModals = () => {
+    setInvalidCredentialsModal(false);
+    setEmptyFieldsModal(false);
+    setLoginSuccessModal(false);
+  };
+
   const handleLogin = (e) => {
     e.preventDefault();
+
+    if (!username || !password) {
+      showEmptyFieldsModal();
+      return;
+    }
 
     const loginData = {
       username: username,
@@ -26,7 +56,10 @@ const LoginAdminPage = ({ setUserRole }) => {
         if (role) {
           localStorage.setItem('role', role);
           setUserRole(role);
+          showLoginSuccessModal();
           navigate('/');
+        } else {
+          showInvalidCredentialsModal();
         }
       })
       .catch((error) => {
@@ -72,6 +105,37 @@ const LoginAdminPage = ({ setUserRole }) => {
       <div className="footer-card">
         <p>2023 - IHSA</p>
       </div>
+
+      {/* Modals */}
+      <Modal
+        title="Invalid Username or Password"
+        visible={invalidCredentialsModal}
+        onOk={closeModals}
+        onCancel={closeModals}
+        okText="OK"
+      >
+        Please check your username and password.
+      </Modal>
+
+      <Modal
+        title="Empty Fields"
+        visible={emptyFieldsModal}
+        onOk={closeModals}
+        onCancel={closeModals}
+        okText="OK"
+      >
+        Please fill in both the username and password fields.
+      </Modal>
+
+      <Modal
+        title="Login Successful"
+        visible={loginSuccessModal}
+        onOk={closeModals}
+        onCancel={closeModals}
+        okText="OK"
+      >
+        You have successfully logged in.
+      </Modal>
     </div>
   );
 };
