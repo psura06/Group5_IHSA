@@ -8,6 +8,7 @@ const password3 = process.env.ADMIN3_PASSWORD;
 const password4 = process.env.SHOWADMIN1_PASSWORD;
 const password5 = process.env.SHOWADMIN2_PASSWORD;
 const password6 = process.env.SHOWADMIN3_PASSWORD;
+const password7 = process.env.SUPERADMIN_PASSWORD;
 
 bcrypt.hash(password1, saltRounds, function(err, hash) {
   console.log('Hashed ADMIN1_PASSWORD: ', hash);
@@ -31,4 +32,8 @@ bcrypt.hash(password5, saltRounds, function(err, hash) {
 
 bcrypt.hash(password6, saltRounds, function(err, hash) {
   console.log('Hashed SHOWADMIN3_PASSWORD: ', hash);
+});
+
+bcrypt.hash(password7, saltRounds, function(err, hash) {
+  console.log('Hashed SUPERADMIN_PASSWORD: ', hash);
 });
