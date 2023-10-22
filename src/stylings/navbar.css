@@ -1,7 +1,7 @@
 /* Navbar Styles */
 .navbar {
   display: flex;
-  justify-content: space-between; /* Push buttons to the right and logo to the left */
+  justify-content: space-between;
   align-items: center;
   background-color: navy;
   color: white;
@@ -13,8 +13,9 @@
   z-index: 999;
   width: 100%;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-  white-space: nowrap; /* Prevent button text from wrapping */
-  overflow-x: hidden; /* Hide horizontal scrollbar */
+  white-space: nowrap;
+  overflow-x: hidden;
+  
 }
 
 body {
@@ -24,16 +25,17 @@ body {
 .logo {
   max-width: 80px;
   height: auto;
-  margin-left: 5px; /* Add margin to the left of the logo */
+  margin-left: 5px;
 }
 
 .menu {
   display: flex;
   align-items: center;
   list-style: none;
-  white-space: nowrap; /* Prevent button text from wrapping */
-  gap: 0.3rem; /* Adjust the gap between buttons */
-  margin-right: 20px; /* Add margin to the right of the buttons */
+  white-space: nowrap;
+  gap: 0.3rem;
+  margin-right: 20px;
+  
 }
 
 .menu li {
@@ -44,17 +46,17 @@ body {
 .menu a {
   color: white;
   text-decoration: none;
-  font-size: 11px; /* Decrease font size for smaller buttons */
+  font-size: 26px; /* Change font size to 22px */
   position: relative;
   display: flex;
-  align-items: center; /* Center icon and text vertically */
-  padding: 0.2rem; /* Adjust padding for better spacing */
+  align-items: center;
+  padding: 0.2rem;
 }
 
 .navbar a svg {
-  margin-right: 0.2rem; /* Add space between icon and text */
-  width: 12px; /* Decrease the icon size */
-  height: 12px;
+  margin-right: 0.2rem;
+  width: 20px; /* Change the icon size to 22px */
+  height: 20px;
 }
 
 .menu a:hover::after {
@@ -74,13 +76,13 @@ body {
   background: transparent;
   color: white;
   text-decoration: none;
-  font-size: 11px; /* Decrease font size for smaller buttons */
+  font-size: 22px; /* Change font size to 22px */
   position: relative;
   border: none;
   display: flex;
   align-items: center;
-  padding: 0.3rem; /* Adjust padding for better spacing */
-  margin-right: 10px; /* Add space to the right of the last button */
+  padding: 0.3rem;
+  margin-right: 10px;
 }
 
 .login:hover::after {
