@@ -72,6 +72,7 @@ const ManageRidersPage = ({ userRole, handleLogout }) => {
             ID: editedValues.ID,
             RiderName: editedValues.RiderName,
             School: editedValues.School,
+            OverWeight: editedValues.OverWeight,
           }
         : item
     );
