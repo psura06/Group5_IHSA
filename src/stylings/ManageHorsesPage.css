@@ -33,5 +33,5 @@
   
   /* Add some gap between Add and Download buttons */
   .manage-horses-layout .input-row > :nth-child(8) {
-    margin-left: 16px;
+    margin-left: 1px;
   }

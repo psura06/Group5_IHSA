@@ -7,7 +7,9 @@ const bcrypt = require('bcrypt');
 const { validationResult ,body} = require('express-validator');
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: 'https://group5-ihsa.vercel.app/'
+}));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'client/build')));
 

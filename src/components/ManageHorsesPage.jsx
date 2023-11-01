@@ -12,6 +12,7 @@ const ManageHorsesPage = ({ userRole, handleLogout }) => {
   const [classInput, setClassInput] = useState([]); // State to select Show Classes
   const [horseNameInput, setHorseNameInput] = useState('');
   const [underweightInput, setUnderweightInput] = useState('');
+  const [underheightInput, setUnderheightInput] = useState('');
   const [tableData, setTableData] = useState([]);
   // const [pasteData, setPasteData] = useState('');
   const [showClasses, setShowClasses] = useState([]);
@@ -33,11 +34,13 @@ const ManageHorsesPage = ({ userRole, handleLogout }) => {
         Class: selectedClass,
         HorseName: horseNameInput,
         UnderWeight: underweightInput,
+        UnderHeight: underheightInput,
       }));
       setTableData([...tableData, ...newRows]);
       setClassInput([]);
       setHorseNameInput('');
       setUnderweightInput('F');
+      setUnderheightInput('F');
     }
   };
 
@@ -54,6 +57,7 @@ const ManageHorsesPage = ({ userRole, handleLogout }) => {
             Class: editedValues.Class,
             HorseName: editedValues.HorseName,
             UnderWeight: editedValues.UnderWeight,
+            UnderHeight: editedValues.UnderHeight,
           }
         : item
     );
@@ -72,9 +76,11 @@ const ManageHorsesPage = ({ userRole, handleLogout }) => {
       Class: item.Class,
       "Horse Name": item.HorseName,
       UnderWeight: item.UnderWeight,
+      UnderHeight: item.UnderHeight,
+
     }));
 
-    const header = ["Class", "Horse Name", "UnderWeight"];
+    const header = ["Class", "Horse Name", "UnderWeight", "UnderHeight"];
     const worksheet = XLSX.utils.json_to_sheet(modifiedData, { header });
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, worksheet, 'HorsesData');
@@ -138,6 +144,23 @@ const ManageHorsesPage = ({ userRole, handleLogout }) => {
         ),
     },
     {
+      title: 'UnderHeight',
+      dataIndex: 'UnderHeight',
+      render: (_, record) =>
+        editingRow === record ? (
+          <Select
+            style={{ width: '100%' }}
+            value={editedValues.UnderHeight}
+            onChange={(value) => setEditedValues({ ...editedValues, UnderHeight: value })}
+          >
+            <Option value="T">T</Option>
+            <Option value="F">F</Option>
+          </Select>
+        ) : (
+          record.UnderHeight
+        ),
+    },
+    {
       title: 'Action',
       dataIndex: 'Action',
       render: (_, record) => {
@@ -170,7 +193,7 @@ const ManageHorsesPage = ({ userRole, handleLogout }) => {
         <div className="manage-horses-content">
           <h1>Manage Horses</h1>
           <Row gutter={16} className="input-row">
-            <Col span={4}>
+            <Col span={5}>
               <Input.TextArea
                 placeholder="Add Show Classes (one per line)"
                 autoSize={{ minRows: 3 }}
@@ -183,7 +206,7 @@ const ManageHorsesPage = ({ userRole, handleLogout }) => {
                 Add Class
               </Button>
             </Col>
-            <Col span={3}>
+            <Col span={4}>
               {showClasses.length > 0 && (
                 <Select
                   mode="multiple" // This sets up multi-select
@@ -200,7 +223,7 @@ const ManageHorsesPage = ({ userRole, handleLogout }) => {
                 </Select>
               )}
             </Col>
-            <Col span={3}>
+            <Col span={2}>
               <Input
                 placeholder="Horse Name"
                 value={horseNameInput}
@@ -217,6 +240,15 @@ const ManageHorsesPage = ({ userRole, handleLogout }) => {
               </Select>
             </Col>
             <Col span={3}>
+              <Select style={{ width: '100%' }} value={underheightInput} onChange={(value) => setUnderheightInput(value)}>
+              <Option value="instruction" disabled>
+                  UnderHeight
+                </Option>
+                <Option value="T">T</Option>
+                <Option value="F">F</Option>
+              </Select>
+            </Col>
+            <Col span={2}>
               <Button type="primary" onClick={handleAdd}>
                 Add
               </Button>
