@@ -17,6 +17,8 @@ import ManageHorsesPage from './components/ManageHorsesPage';
 import UserManagementPage from './components/UserManagementPage';
 import ManageAnnouncementsPage from './components/ManageAnnouncementsPage';
 import UserHandler from './UserHandler';
+import RandomizedResultsPage from './components/RandomizedResultsPage';
+import { TableDataProvider } from './components/TableDataContext';
 
 const App = () => {
   return (
@@ -24,8 +26,10 @@ const App = () => {
       <div className="app-container">
         <UserHandler>
           {({ userRole, handleLogout, setUserRole }) => (
+             <TableDataProvider>
             <Routes>
               <Route path="/" element={<HomePage userRole={userRole} handleLogout={handleLogout} />} />
+              <Route path="/results" element={<RandomizedResultsPage userRole={userRole} handleLogout={handleLogout} />} />
               <Route path="/about" element={<AboutPage userRole={userRole} handleLogout={handleLogout} />} />
               <Route path="/contact" element={<ContactPage userRole={userRole} handleLogout={handleLogout} />} />
               {(userRole === 'admin' || userRole === 'showadmin' || userRole === 'superadmin') && (
@@ -59,6 +63,7 @@ const App = () => {
                 <Route path="/user-management" element={<UserManagementPage userRole={userRole} handleLogout={handleLogout} />} />
               )}
             </Routes>
+            </TableDataProvider>
           )}
         </UserHandler>
       </div>

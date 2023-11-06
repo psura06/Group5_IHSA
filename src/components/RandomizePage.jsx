@@ -6,11 +6,12 @@ import '../stylings/randomizePage.css';
 import NavBar from './NavBar';
 import { Button, message } from 'antd';
 import { Table } from 'semantic-ui-react';
+import { useTableData } from './TableDataContext';
 
 const RandomizePage = ({ userRole, handleLogout }) => {
   const [ridersFile, setRidersFile] = useState(null);
   const [horsesFile, setHorsesFile] = useState(null);
-  const [tableData, setTableData] = useState([]);
+  const {tableData, updateTableData} = useTableData();
   const [ridersFileUploaded, setRidersFileUploaded] = useState(false);
   const [horsesFileUploaded, setHorsesFileUploaded] = useState(false);
 
@@ -165,7 +166,7 @@ const RandomizePage = ({ userRole, handleLogout }) => {
 
       console.log('Results:', results);
 
-      setTableData(results);
+      updateTableData(results);
     } catch (error) {
       message.error('Error randomizing:', error);
     }
@@ -217,7 +218,7 @@ const RandomizePage = ({ userRole, handleLogout }) => {
   const handleClearData = () => {
     setRidersFile(null);
     setHorsesFile(null);
-    setTableData([]);
+    updateTableData([]);
     setRidersFileUploaded(false);
     setHorsesFileUploaded(false);
     const ridersInput = document.getElementById('ridersInput');
