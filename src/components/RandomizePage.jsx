@@ -4,6 +4,7 @@ import { saveAs } from 'file-saver';
 import ExcelJS from 'exceljs';
 import '../stylings/randomizePage.css';
 import NavBar from './NavBar';
+import { Button, message } from 'antd';
 import { Table } from 'semantic-ui-react';
 
 const RandomizePage = ({ userRole, handleLogout }) => {
@@ -37,17 +38,19 @@ const RandomizePage = ({ userRole, handleLogout }) => {
     const riders = await parseExcelFile(e.target.files[0]);
     setRidersFile(riders);
     setRidersFileUploaded(true);
+    message.success('Rider file uploaded successfully');
   };
 
   const handleHorsesFileChange = async (e) => {
     const horses = await parseExcelFile(e.target.files[0]);
     setHorsesFile(horses);
     setHorsesFileUploaded(true);
+    message.success('Horse file uploaded successfully');
   };
 
   const handleRandomizeClick = async () => {
     if (!ridersFile || !horsesFile) {
-      console.error('Both riders and horses files must be uploaded');
+      message.error('Both riders and horses files must be uploaded');
       return;
     }
 
@@ -164,13 +167,13 @@ const RandomizePage = ({ userRole, handleLogout }) => {
 
       setTableData(results);
     } catch (error) {
-      console.error('Error randomizing:', error);
+      message.error('Error randomizing:', error);
     }
   };
 
   const handleDownloadTable = async () => {
     if (tableData.length === 0) {
-      console.error('Table is empty, cannot download');
+      message.error('Table is empty, cannot download');
       return;
     }
   
@@ -210,6 +213,20 @@ const RandomizePage = ({ userRole, handleLogout }) => {
     const blob = await workbook.xlsx.writeBuffer();
     saveAs(new Blob([blob]), 'Randomized_Results.xlsx');
   };
+
+  const handleClearData = () => {
+    setRidersFile(null);
+    setHorsesFile(null);
+    setTableData([]);
+    setRidersFileUploaded(false);
+    setHorsesFileUploaded(false);
+    const ridersInput = document.getElementById('ridersInput');
+  const horsesInput = document.getElementById('horsesInput');
+  if (ridersInput && horsesInput) {
+    ridersInput.value = ''; // Clear the riders file input
+    horsesInput.value = ''; // Clear the horses file input
+  }
+  };
   
   return (
     <div>
@@ -218,26 +235,37 @@ const RandomizePage = ({ userRole, handleLogout }) => {
         <div className="transparentCard">
           <h1>Riders and Horses List</h1>
           <div className="uploadCard">
-            <h2>Upload Riders</h2>
-            <button onClick={() => document.getElementById('ridersInput').click()} className="chooseFileButton">
-              Choose File
-            </button>
+          <h2>Upload Riders</h2>
             <input id="ridersInput" type="file" onChange={handleRidersFileChange} hidden />
-            {ridersFileUploaded && <p>File uploaded successfully</p>}
-            <h2>Upload Horses</h2>
-            <button onClick={() => document.getElementById('horsesInput').click()} className="chooseFileButton">
+            <Button type="primary" onClick={() => document.getElementById('ridersInput').click()}>
               Choose File
-            </button>
+            </Button>
+            {ridersFileUploaded && (
+              <p>Rider file uploaded successfully</p>
+            )}
+            <h2>Upload Horses</h2>
             <input id="horsesInput" type="file" onChange={handleHorsesFileChange} hidden />
-            {horsesFileUploaded && <p>File uploaded successfully</p>}
+            <Button type="primary" onClick={() => document.getElementById('horsesInput').click()}>
+              Choose File
+            </Button>
+            {horsesFileUploaded && (
+              <p>Horse file uploaded successfully</p>
+            )}
           </div>
-          <button className="randomizeButton" onClick={handleRandomizeClick}>
+          <div className="buttonGroup">
+          <Button type="primary" className="randomizeButton" onClick={handleRandomizeClick}>
             RANDOMIZE
-          </button>
-          <button className="downloadButton" onClick={handleDownloadTable}>
+          </Button>
+          <Button type="primary" className="downloadButton" onClick={handleDownloadTable}>
             DOWNLOAD TABLE
-          </button>
-        </div>
+          </Button>
+          <div style={{ marginTop: '10px' }}>
+          <Button type="primary" className="clearButton" onClick={handleClearData}>
+            CLEAR
+          </Button>
+          </div>
+          </div>
+          </div>
         <div className="resultsContainer">
           {/* Display the tables here */}
           <div className="resultsTableContainer">

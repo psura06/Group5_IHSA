@@ -49,12 +49,16 @@
 .randomizeButton,
 .downloadButton {
   background-color: blue;
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 5px;
+  
+  margin-left: 20px;
+  cursor: pointer;text-align: center; 
+}
+
+.clearButton {
+  background-color: rgb(219, 12, 12);
   margin-left: 20px;
   cursor: pointer;
+  text-align: center; 
 }
 
 .fileUploadMessage {
