@@ -302,13 +302,13 @@ const UserManagementPage = ({ userRole, loggedInUser, handleLogout }) => {
                     Make Admin
                   </Button>
                   <Button
-                    type="danger"
-                    size="small"
-                    style={{ marginLeft: 10 }}
-                    onClick={() => handleRemoveAccess(record.username, record.role)}
-                  >
-                    Remove Access
-                  </Button>
+                      type="danger"
+                      size="small"
+                      style={{ backgroundColor: 'red', color: 'white', marginLeft: 10 }}
+                      onClick={() => handleRemoveAccess(record.username, record.role)}
+                    >
+                      Remove Access
+                    </Button>
                   {userRole === 'superadmin' && (
                     <Button
                       type="primary"
