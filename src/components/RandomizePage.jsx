@@ -11,7 +11,7 @@ import { useTableData } from './TableDataContext';
 const RandomizePage = ({ userRole, handleLogout }) => {
   const [ridersFile, setRidersFile] = useState(null);
   const [horsesFile, setHorsesFile] = useState(null);
-  const {tableData, updateTableData} = useTableData();
+  const { tableData, updateTableData } = useTableData();
   const [ridersFileUploaded, setRidersFileUploaded] = useState(false);
   const [horsesFileUploaded, setHorsesFileUploaded] = useState(false);
 
@@ -54,146 +54,182 @@ const RandomizePage = ({ userRole, handleLogout }) => {
       message.error('Both riders and horses files must be uploaded');
       return;
     }
-
+  
     try {
-      // Ensure that the data is parsed correctly
       const parsedRiders = JSON.parse(JSON.stringify(ridersFile));
       const parsedHorses = JSON.parse(JSON.stringify(horsesFile));
-
-      // Extract class names from filtered riders and horses data
-      const riderClassNames = [...new Set(parsedRiders.map((rider) => rider['Class']))]
-        .filter(Boolean); // Filter out undefined or empty class names
-      const horseClassNames = [...new Set(parsedHorses.map((horse) => horse['Class']))]
-        .filter(Boolean); // Filter out undefined or empty class names
-
+  
+      const riderClassNames = [...new Set(parsedRiders.map((rider) => rider['Class']))].filter(Boolean);
+      const horseClassNames = [...new Set(parsedHorses.map((horse) => horse['Class']))].filter(Boolean);
+  
       console.log('Rider Class Names:', riderClassNames);
       console.log('Horse Class Names:', horseClassNames);
-
-      // Combine all class names from both datasets
+  
       const allClassNames = [...new Set([...riderClassNames, ...horseClassNames])];
-
+  
       console.log('All Class Names:', allClassNames);
-
+  
       let results = [];
       let showClassNumber = 1;
-
+  
       for (let classKey of allClassNames) {
         let ridersInClass = parsedRiders.filter((rider) => rider['Class'] === classKey) || [];
         let horsesInClass = parsedHorses.filter((horse) => horse['Class'] === classKey) || [];
-
+  
         console.log('Class Name:', classKey);
         console.log('Riders Count:', ridersInClass.length);
         console.log('Horses Count:', horsesInClass.length);
-
+  
         let classResult = [];
         let uniqueHorsesUsed = new Set();
-        let overweightTRiders = [];
-        let underweightTRiders = [];
-
+  
+        // Priority 1: OverHeight T and OverWeight T should be assigned to UnderHeight F and UnderWeight F
         for (let rider of ridersInClass) {
-          // Check if the rider is overweight T or underweight T
-          if (rider['OverWeight'] === 'T') {
-            underweightTRiders.push(rider);
-          } else {
-            overweightTRiders.push(rider);
+          if (rider['OverHeight'] === 'T' && rider['OverWeight'] === 'T') {
+            let availableHorses = horsesInClass.filter(
+              (horse) => horse['UnderHeight'] === 'F' && horse['UnderWeight'] === 'F'
+            );
+  
+            availableHorses = availableHorses.filter(
+              (horse) => !uniqueHorsesUsed.has(horse['Horse Name'])
+            );
+  
+            if (availableHorses.length > 0) {
+              const randomIndex = Math.floor(Math.random() * availableHorses.length);
+              const horse = availableHorses[randomIndex];
+  
+              classResult.push({
+                Number: rider['ID'] || '',
+                'Rider Name': rider['Rider Name'] || '',
+                School: rider['School'] || '',
+                'Draw Order': classResult.length + 1,
+                'Horse Name': horse['Horse Name'] || '',
+              });
+  
+              uniqueHorsesUsed.add(horse['Horse Name']);
+            }
           }
         }
-
-        // Assign horses for underweight T riders
-        for (let rider of underweightTRiders) {
-          // Check if there are eligible "F" horses
-          let availableHorses = horsesInClass.filter(
-            (horse) => horse['UnderWeight'] === 'F'
-          );
-
-          // Filter out horses already assigned to overweight T riders
-          availableHorses = availableHorses.filter(
-            (horse) => !uniqueHorsesUsed.has(horse['Horse Name'])
-          );
-
-          if (availableHorses.length > 0) {
-            // Randomly select an "F" horse
-            const randomIndex = Math.floor(Math.random() * availableHorses.length);
-            const horse = availableHorses[randomIndex];
-
-            classResult.push({
-              Number: rider['ID'] || '',
-              'Rider Name': rider['Rider Name'] || '',
-              School: rider['School'] || '',
-              'Draw Order': classResult.length + 1,
-              'Horse Name': horse['Horse Name'] || '',
-            });
-
-            uniqueHorsesUsed.add(horse['Horse Name']);
+  
+        // Priority 2: OverHeight T and OverWeight F should be assigned to UnderHeight F and UnderWeight T or UnderHeight F and UnderWeight F
+        for (let rider of ridersInClass) {
+          if (rider['OverHeight'] === 'T' && rider['OverWeight'] === 'F') {
+            let availableHorses = horsesInClass.filter(
+              (horse) => (horse['UnderHeight'] === 'F' && horse['UnderWeight'] === 'T') ||
+                (horse['UnderHeight'] === 'F' && horse['UnderWeight'] === 'F')
+            );
+  
+            availableHorses = availableHorses.filter(
+              (horse) => !uniqueHorsesUsed.has(horse['Horse Name'])
+            );
+  
+            if (availableHorses.length > 0) {
+              const randomIndex = Math.floor(Math.random() * availableHorses.length);
+              const horse = availableHorses[randomIndex];
+  
+              classResult.push({
+                Number: rider['ID'] || '',
+                'Rider Name': rider['Rider Name'] || '',
+                School: rider['School'] || '',
+                'Draw Order': classResult.length + 1,
+                'Horse Name': horse['Horse Name'] || '',
+              });
+  
+              uniqueHorsesUsed.add(horse['Horse Name']);
+            }
           }
         }
-
-        // Assign horses for overweight T riders
-        for (let rider of overweightTRiders) {
-          // Check if there are eligible "F" or "T" horses
-          let availableHorses = horsesInClass.filter(
-            (horse) => horse['UnderWeight'] === 'F' || horse['UnderWeight'] === 'T'
-          );
-
-          // Filter out horses already assigned to other riders
-          availableHorses = availableHorses.filter(
-            (horse) => !uniqueHorsesUsed.has(horse['Horse Name'])
-          );
-
-          if (availableHorses.length > 0) {
-            // Randomly select a horse (either "F" or "T")
-            const randomIndex = Math.floor(Math.random() * availableHorses.length);
-            const horse = availableHorses[randomIndex];
-
-            classResult.push({
-              Number: rider['ID'] || '',
-              'Rider Name': rider['Rider Name'] || '',
-              School: rider['School'] || '',
-              'Draw Order': classResult.length + 1,
-              'Horse Name': horse['Horse Name'] || '',
-            });
-
-            uniqueHorsesUsed.add(horse['Horse Name']);
+  
+        // Priority 2: OverHeight F and OverWeight T should be assigned to UnderHeight T and UnderWeight F or UnderHeight F and UnderWeight F
+        for (let rider of ridersInClass) {
+          if (rider['OverHeight'] === 'F' && rider['OverWeight'] === 'T') {
+            let availableHorses = horsesInClass.filter(
+              (horse) => (horse['UnderHeight'] === 'T' && horse['UnderWeight'] === 'F') ||
+                (horse['UnderHeight'] === 'F' && horse['UnderWeight'] === 'F')
+            );
+  
+            availableHorses = availableHorses.filter(
+              (horse) => !uniqueHorsesUsed.has(horse['Horse Name'])
+            );
+  
+            if (availableHorses.length > 0) {
+              const randomIndex = Math.floor(Math.random() * availableHorses.length);
+              const horse = availableHorses[randomIndex];
+  
+              classResult.push({
+                Number: rider['ID'] || '',
+                'Rider Name': rider['Rider Name'] || '',
+                School: rider['School'] || '',
+                'Draw Order': classResult.length + 1,
+                'Horse Name': horse['Horse Name'] || '',
+              });
+  
+              uniqueHorsesUsed.add(horse['Horse Name']);
+            }
           }
         }
-
+  
+        // Priority 3: Assign remaining riders with any suitable horses
+        for (let rider of ridersInClass) {
+          if (rider['OverHeight'] === 'F' && rider['OverWeight'] === 'F') {
+            let availableHorses = horsesInClass.filter(
+              (horse) => (horse['UnderHeight'] === 'F' && horse['UnderWeight'] === 'T') ||
+                (horse['UnderHeight'] === 'T' && horse['UnderWeight'] === 'F') ||
+                (horse['UnderHeight'] === 'F' && horse['UnderWeight'] === 'F') ||
+                (horse['UnderHeight'] === 'T' && horse['UnderWeight'] === 'T')
+            );
+  
+            availableHorses = availableHorses.filter(
+              (horse) => !uniqueHorsesUsed.has(horse['Horse Name'])
+            );
+  
+            if (availableHorses.length > 0) {
+              const randomIndex = Math.floor(Math.random() * availableHorses.length);
+              const horse = availableHorses[randomIndex];
+  
+              classResult.push({
+                Number: rider['ID'] || '',
+                'Rider Name': rider['Rider Name'] || '',
+                School: rider['School'] || '',
+                'Draw Order': classResult.length + 1,
+                'Horse Name': horse['Horse Name'] || '',
+              });
+  
+              uniqueHorsesUsed.add(horse['Horse Name']);
+            }
+          }
+        }
+  
         results.push({
           className: `Show Class ${showClassNumber} ${classKey}`,
           data: classResult,
         });
+  
         showClassNumber++;
       }
-
-      console.log('Results:', results);
-
+  
       updateTableData(results);
+  
+      message.success('Randomization completed successfully');
     } catch (error) {
       message.error('Error randomizing:', error);
     }
   };
-
+  
   const handleDownloadTable = async () => {
     if (tableData.length === 0) {
       message.error('Table is empty, cannot download');
       return;
     }
-  
-    // Create a new ExcelJS workbook
+
     const workbook = new ExcelJS.Workbook();
-  
-    // Create a single worksheet for all classes
     const worksheet = workbook.addWorksheet('Randomized Results');
-  
-    // Add data from all classes to the worksheet
+
     tableData.forEach((result, index) => {
-      // Add the class name as a merged cell
       worksheet.addRow([result.className]);
       worksheet.mergeCells(worksheet.lastRow.number, 1, worksheet.lastRow.number, 6);
-  
-      // Add header row for columns
       worksheet.addRow(['Number', 'Rider Name', 'School', 'Draw Order', 'Horse Name']);
-  
-      // Add class data
+
       result.data.forEach((data) => {
         worksheet.addRow([
           data.Number,
@@ -203,14 +239,12 @@ const RandomizePage = ({ userRole, handleLogout }) => {
           data['Horse Name'],
         ]);
       });
-  
-      // Add an empty row between classes except for the last class
+
       if (index < tableData.length - 1) {
         worksheet.addRow([]);
       }
     });
-  
-    // Generate the Excel file
+
     const blob = await workbook.xlsx.writeBuffer();
     saveAs(new Blob([blob]), 'Randomized_Results.xlsx');
   };
@@ -222,13 +256,13 @@ const RandomizePage = ({ userRole, handleLogout }) => {
     setRidersFileUploaded(false);
     setHorsesFileUploaded(false);
     const ridersInput = document.getElementById('ridersInput');
-  const horsesInput = document.getElementById('horsesInput');
-  if (ridersInput && horsesInput) {
-    ridersInput.value = ''; // Clear the riders file input
-    horsesInput.value = ''; // Clear the horses file input
-  }
+    const horsesInput = document.getElementById('horsesInput');
+    if (ridersInput && horsesInput) {
+      ridersInput.value = ''; // Clear the riders file input
+      horsesInput.value = ''; // Clear the horses file input
+    }
   };
-  
+
   return (
     <div>
       <NavBar userRole={userRole} handleLogout={handleLogout} />
@@ -236,7 +270,7 @@ const RandomizePage = ({ userRole, handleLogout }) => {
         <div className="transparentCard">
           <h1>Riders and Horses List</h1>
           <div className="uploadCard">
-          <h2>Upload Riders</h2>
+            <h2>Upload Riders</h2>
             <input id="ridersInput" type="file" onChange={handleRidersFileChange} hidden />
             <Button type="primary" onClick={() => document.getElementById('ridersInput').click()}>
               Choose File
@@ -254,21 +288,20 @@ const RandomizePage = ({ userRole, handleLogout }) => {
             )}
           </div>
           <div className="buttonGroup">
-          <Button type="primary" className="randomizeButton" onClick={handleRandomizeClick}>
-            RANDOMIZE
-          </Button>
-          <Button type="primary" className="downloadButton" onClick={handleDownloadTable}>
-            DOWNLOAD TABLE
-          </Button>
-          <div style={{ marginTop: '10px' }}>
-          <Button type="primary" className="clearButton" onClick={handleClearData}>
-            CLEAR
-          </Button>
+            <Button type="primary" className="randomizeButton" onClick={handleRandomizeClick}>
+              RANDOMIZE
+            </Button>
+            <Button type="primary" className="downloadButton" onClick={handleDownloadTable}>
+              DOWNLOAD TABLE
+            </Button>
+            <div style={{ marginTop: '10px' }}>
+              <Button type="primary" className="clearButton" onClick={handleClearData}>
+                CLEAR
+              </Button>
+            </div>
           </div>
-          </div>
-          </div>
+        </div>
         <div className="resultsContainer">
-          {/* Display the tables here */}
           <div className="resultsTableContainer">
             {tableData.map((result, index) => (
               <div key={index} className="resultsTable">
