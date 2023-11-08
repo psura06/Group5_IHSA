@@ -98,7 +98,6 @@ const ManageHorsesPage = ({ userRole, handleLogout }) => {
       render: (_, record) =>
         editingRow === record ? (
           <Select
-            mode="multiple"
             style={{ width: '100%' }}
             value={editedValues.Class}
             onChange={(value) => setEditedValues({ ...editedValues, Class: value })}
