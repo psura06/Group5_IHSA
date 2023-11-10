@@ -291,14 +291,19 @@ const RandomizePage = ({ userRole, handleLogout }) => {
             <Button type="primary" className="randomizeButton" onClick={handleRandomizeClick}>
               RANDOMIZE
             </Button>
+            <Button type="primary" className="guideButton">
+              <a href="https://scribehow.com/shared/Step-by-step_guide_to_managing_show_class_riders_and_horses_in_the_system__dmSv1ExASU-lOyRS9uhykg" target="_blank">
+                GUIDE
+              </a>
+            </Button>
+            <div style={{ marginTop: '10px' }}>
             <Button type="primary" className="downloadButton" onClick={handleDownloadTable}>
               DOWNLOAD TABLE
             </Button>
-            <div style={{ marginTop: '10px' }}>
               <Button type="primary" className="clearButton" onClick={handleClearData}>
                 CLEAR
               </Button>
-            </div>
+              </div>
           </div>
         </div>
         <div className="resultsContainer">

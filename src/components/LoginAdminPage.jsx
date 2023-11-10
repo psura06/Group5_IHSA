@@ -16,6 +16,22 @@ const LoginAdminPage = ({ setUserRole }) => {
   const [superadminUsername, setSuperadminUsername] = useState('');
   const navigate = useNavigate();
 
+  // Check if the user is already logged in
+  useEffect(() => {
+    const userRole = localStorage.getItem('role');
+    if (userRole) {
+      setUserRole(userRole);
+      // Redirect to the previously saved target page
+      const targetPage = localStorage.getItem('targetPage');
+      if (targetPage) {
+        localStorage.removeItem('targetPage'); // Clear the saved target page
+        navigate(targetPage);
+      } else {
+        navigate('/'); // Default to the home page
+      }
+    }
+  }, [navigate, setUserRole]);
+
   useEffect(() => {
     // Fetch superadmin username when the component mounts
     axios.get('/api/superadmin')
@@ -48,8 +64,16 @@ const LoginAdminPage = ({ setUserRole }) => {
       .then((response) => {
         const role = response.data && response.data.role;
         if (role) {
-          localStorage.setItem('role', role);
+          localStorage.setItem('role', role); // Store user role in localStorage
           setUserRole(role);
+          // Redirect to the previously saved target page
+          const targetPage = localStorage.getItem('targetPage');
+          if (targetPage) {
+            localStorage.removeItem('targetPage'); // Clear the saved target page
+            navigate(targetPage);
+          } else {
+            navigate('/'); // Default to the home page
+          }
           if (role === 'admin') {
             message.success('Admin Login Successful');
           } else if (role === 'showadmin') {
@@ -57,7 +81,6 @@ const LoginAdminPage = ({ setUserRole }) => {
           } else if (role === 'superadmin') {
             message.success('SuperAdmin Login Successful');
           }
-          navigate('/');
         } else {
           if (response.status === 401) {
             message.error('Invalid credentials. Please enter correct credentials.');
@@ -77,7 +100,7 @@ const LoginAdminPage = ({ setUserRole }) => {
   };
 
   const handleForgotCredentials = (e) => {
-    e.preventDefault(); 
+    e.preventDefault();
     // Display the modal-like message when "Forgot Username" or "Forgot Password" is clicked
     setDisplayMessage(true);
   };
@@ -141,7 +164,7 @@ const LoginAdminPage = ({ setUserRole }) => {
             </button>
           </form>
           <div className="forgot-links">
-          <a href="/" onClick={handleForgotCredentials}>
+            <a href="/" onClick={handleForgotCredentials}>
               Forgot Username?
             </a>
             <a href="/" onClick={handleForgotCredentials}>

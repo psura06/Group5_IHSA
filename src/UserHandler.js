@@ -1,14 +1,20 @@
-import  { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const UserHandler = ({ children }) => {
   const [userRole, setUserRole] = useState(null);
   const navigate = useNavigate();
+  useEffect(() => {
+    const userRole = localStorage.getItem('role');
+    if (userRole) {
+      setUserRole(userRole);
+    }
+  }, []);
 
   const handleLogout = () => {
     setUserRole(null);
     localStorage.removeItem('role');
-    navigate('/'); // Redirect to Home Page
+    navigate('/');
   };
 
   return children({ userRole, setUserRole, handleLogout });

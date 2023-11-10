@@ -47,6 +47,12 @@
 }
 
 .randomizeButton,
+.guideButton {
+  background-color: blue;
+  margin-left: 20px;
+  cursor: pointer;text-align: center; 
+}
+
 .downloadButton {
   background-color: blue;
   
@@ -57,6 +63,8 @@
 .clearButton {
   background-color: rgb(219, 12, 12);
   margin-left: 20px;
+  margin-top: 10px;
+  float: right;
   cursor: pointer;
   text-align: center; 
 }
