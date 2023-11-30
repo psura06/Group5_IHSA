@@ -29,7 +29,7 @@ const HomePage = ({ userRole, handleLogout }) => {
     loadEvents();
 
     // Fetch announcements from the server
-    axios.get('http://localhost:8000/api/announcements')
+    axios.get('http://localhost:8080/api/announcements')
       .then(response => {
         setAnnouncements(response.data);
       })

@@ -29,9 +29,9 @@ body {
 
 .menu {
   display: flex;
-  flex-wrap: wrap; /* Allow menu items to wrap to the next line */
   align-items: center;
   list-style: none;
+  white-space: nowrap;
   gap: 0.3rem;
   margin-right: 20px;
 }
@@ -39,13 +39,12 @@ body {
 .menu li {
   display: flex;
   align-items: center;
-  margin-bottom: 10px; /* Add some spacing between menu items on smaller screens */
 }
 
 .menu a {
   color: white;
   text-decoration: none;
-  font-size: 18px; /* Reduce font size for smaller screens */
+  font-size: 26px;
   position: relative;
   display: flex;
   align-items: center;
@@ -54,8 +53,8 @@ body {
 
 .menu a svg {
   margin-right: 0.2rem;
-  width: 16px; /* Adjust icon size for smaller screens */
-  height: 16px;
+  width: 20px;
+  height: 20px;
 }
 
 .menu a:hover::after {
@@ -75,7 +74,7 @@ body {
   background: transparent;
   color: white;
   text-decoration: none;
-  font-size: 18px; /* Reduce font size for smaller screens */
+  font-size: 22px;
   position: relative;
   border: none;
   display: flex;

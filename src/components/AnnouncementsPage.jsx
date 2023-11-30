@@ -9,7 +9,7 @@ const AnnouncementsPage = ({ userRole, handleLogout }) => {
   const [announcements, setAnnouncements] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:8000/api/announcements')
+    axios.get('http://localhost:8080/api/announcements')
       .then(response => {
         // Convert date to 'yyyy-mm-dd' format right after fetching from the server
         const formattedData = response.data.map(item => {

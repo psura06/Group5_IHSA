@@ -11,7 +11,7 @@ app.use(cors({
  
 }));
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'client/build')));
+app.use(express.static(path.join(__dirname, 'build')));
 
 const connection = mysql.createConnection({
   host: process.env.DB_HOST,
@@ -679,6 +679,6 @@ app.get('/api/superadmin', (req, res) => {
   });
 });
 
-app.listen(process.env.PORT || 8000, () => {
-  console.log(`Server is running on port ${process.env.PORT || 8000}`);
+app.listen(process.env.PORT || 8080, () => {
+  console.log(`Server is running on port ${process.env.PORT || 8080}`);
 });

@@ -91,7 +91,7 @@ function MapPage({ userRole, handleLogout }) {
   const mapRef = useRef();
 
   useEffect(() => {
-    axios.get('http://localhost:8000/api/schools')
+    axios.get('http://localhost:8080/api/schools')
       .then(response => {
         setSchools(response.data);
       })
@@ -170,7 +170,7 @@ function MapPage({ userRole, handleLogout }) {
       return;
     }
 
-    axios.put(`http://localhost:8000/api/schools/${college.id}`, {
+    axios.put(`http://localhost:8080/api/schools/${college.id}`, {
       latitude: latitudeInput,
       longitude: longitudeInput,
     })
@@ -178,7 +178,7 @@ function MapPage({ userRole, handleLogout }) {
         setLatitudeInput('');
         setLongitudeInput('');
         setAddCollegeSuccessMessage('Latitude and longitude updated successfully');
-        axios.get('http://localhost:8000/api/schools')
+        axios.get('http://localhost:8080/api/schools')
           .then(response => {
             setSchools(response.data);
           })
@@ -202,13 +202,13 @@ function MapPage({ userRole, handleLogout }) {
       return;
     }
 
-    axios.delete(`http://localhost:8000/api/schools/${college.id}`)
+    axios.delete(`http://localhost:8080/api/schools/${college.id}`)
       .then(response => {
         setRemoveSuccessMessage('College removed successfully');
         setLatitudeInput('');
         setLongitudeInput('');
         setAddCollegeSuccessMessage('');
-        axios.get('http://localhost:8000/api/schools')
+        axios.get('http://localhost:8080/api/schools')
           .then(response => {
             setSchools(response.data);
           })
@@ -237,7 +237,7 @@ function MapPage({ userRole, handleLogout }) {
       return;
     }
 
-    axios.post('http://localhost:8000/api/schools', {
+    axios.post('http://localhost:8080/api/schools', {
       college_name: collegeNameInput,
       state_name: stateNameInput, // Add stateNameInput
       active_riders: activeRidersInput, // Add activeRidersInput
@@ -254,7 +254,7 @@ function MapPage({ userRole, handleLogout }) {
         setLatitudeInput('');
         setLongitudeInput('');
         setAddCollegeSuccessMessage(`Successfully added "${collegeNameInput}"`);
-        axios.get('http://localhost:8000/api/schools')
+        axios.get('http://localhost:8080/api/schools')
           .then(response => {
             setSchools(response.data);
           })
